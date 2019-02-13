@@ -1,0 +1,486 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>SRFI 165: The Environment Monad</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="/srfi.css" type="text/css" />
+    <link href="/favicon.png" rel="icon" sizes="192x192" type="image/png" />
+  </head>
+
+  <body>
+
+    <h1>Title</h1>
+
+    The Environment Monad
+
+    <h1>Author</h1>
+
+    Marc Nieper-Wißkirchen
+
+    <h1>Status</h1>
+
+    <h1>Abstract</h1>
+
+    Monads model computations.  The environment monad models
+    computations that depend on values from a shared environment.
+    These computations can read values from the environment, pass
+    values to subsequent computations, execute sub-computations in an
+    extended environment, and modify the environment for future
+    computations.
+
+    <h1>Issues</h1>
+
+    <ul>
+      <li>
+	<p>
+	  We should specify which procedures are guaranteed to be
+	  called in tail position by the various primitives below and
+	  which expressions are in tail position.
+	</p>
+      </li>
+      <li>
+	<p>
+	  We should specify the interaction of the various primitives
+	  below with non-local control flow.
+	</p>
+      </li>
+      <li>
+	<p>
+	  This SRFI defines an interface, on which SRFIs like SRFI 159
+	  are supposed to be built.  There is a conceptual difference
+	  between SRFI 159 and this SRFI, though.  The environment
+	  variables of SRFI 159 are raw symbols, that, while making
+	  them easy to use in simple cases, do not respect lexical
+	  scope and are entirely unhygienic.  The environment
+	  variables of this SRFI are like the parameters objects of
+	  SRFI 39, which are lexically scoped and can participate in
+	  the name-spacing provided by R7RS's library system and in
+	  Scheme's macro hygiene.  It is therefore recommended to
+	  amend SRFI 159 so that it based on the infrastructure of
+	  this SRFI and does not use raw symbols.
+	</p>
+
+	<p>
+	  The alternative would be to allow also raw symbols as
+	  environment variables in this SRFI (and to change the syntax
+	  of <code>fn</code>, <code>with</code> and <code>with!</code>
+	  accordingly).  While this has the advantage of being
+	  compatible to SRFI 159 as written, it has the drawback that
+	  it encourages the use of raw symbols to denote environment
+	  variables, leading to non-composable computations and to
+	  leaking of internal implementation details.
+	</p>
+      </li>
+    </ul>
+
+    <h1>Rationale</h1>
+
+    <p>The environment monad is useful whenever code has to be
+      suspended and executed at a later time (even several times) and
+      whenever code depends (implicitly) on bindings of variables in a
+      shared environment.
+    </p>
+
+    <p>
+      SRFI 159 is a major use case of the environment monad and a good
+      example of the concept in practice.
+    </p>
+
+    <h2>Monads</h2>
+
+    <p>
+      In category theory, a <em>monad</em> on a category <var>C</var>
+      is nothing but a monoid in the monoidal category of endofunctors
+      [<var>C</var>, <var>C</var>] over <var>C</var>.  This rather
+      abstract notion has become a well-understood design pattern in
+      functional programming, having been popularized notably by the
+      lazy functional programming language Haskell.
+    </p>
+
+    <p>
+      As there are already many good explanations for monads in
+      computer science and as understanding the mathematical concept
+      in detail is not necessary to work with this SRFI, we refrain
+      from repeating the theoretical foundations.  We just want to
+      remark that the
+      <em>environment monad</em> considered here is roughly a monad on
+      the category whose objects are natural numbers <var>n</var> and whose
+      morphisms <var>m</var> → <var>n</var> are Scheme procedures
+      taking <var>m</var> values and returning <var>n</var> values.
+      Moreover, what is called the environment monad here and
+      somewhere else is called the <em>Reader</em> monad in Haskell.
+    </p>
+
+    <p>
+      This SRFI introduces two new concepts, <dfn>environments</dfn>
+      and <dfn>computations</dfn>.
+    </p>
+
+    <p>
+      The computations are the monadic values of the environment monad
+      described in this SRFI.
+    </p>
+
+    <h2>Computations</h2>
+
+    <p>
+      A computation can be thought of as suspended code much like
+      promises but with the difference that a computation can
+      be <dfn>executed</dfn> more than once and that its results are not
+      cached.
+    </p>
+
+    <p>
+      When executed, a computation yields <dfn>results</dfn>, which
+      can be arbitrary Scheme values.
+    </p>
+
+    <p>
+      The simplest computation is <code>(return <var>val<sub>1</sub>
+	  …)</code>, which just yields the
+	  results <var>val<sub>1</sub></var> … when executed.
+    </p>
+
+    <p>
+      This SRFI provides a number of combinators that combine
+      computations.  For
+      example <code>(sequence <var>computation<sub>1</sub></var>
+      … <var>computation<sub>n</sub></var>)</code> is the computation
+      formed by applying each <var>computation<sub>1</sub></var>,
+      …, <var>computation<sub>n</sub></var> in sequence and eventually
+      yielding the results of the last one.
+    </p>
+
+    <p>
+      Another combinator known from monads in functional programming
+      is the computation
+      <code>(bind <var>computation</var> <var>proc</var>)</code>,
+      which is the computation formed by feeding the results yielded
+      by <var>computation</var> to <var>proc</var> and yielding the
+      results of the computation returned by the invocation
+      of <var>proc</var>.
+    </p>
+
+    <p>Computations are executed by <code>run</code>.  The
+      expression <code>(run <var>computation</var>)</code> returns the
+      values yielded by the execution of <var>computation</var>.
+    </p>
+
+    <p>The primary constructor for computations
+      is <code>make-computation</code>.  For example,
+    </p>
+    <pre>(make-computation
+  (lambda (compute)
+    (if (compute a) 42 (compute b)))</pre>
+    <p>
+      returns a computation that, when executed, first
+      computes <code>a</code>.  If that computation yields a true
+      value, <code>42</code> is yielded, otherwise the result that is
+      yielded by computing <code>b</code>.
+    </p>
+
+    <h2>Environments</h2>
+
+    <p>
+      The computations of the environment monad are executed on
+      an <dfn>environment</dfn>.  <dfn>Environment variables</dfn> can
+      be bound to values in these environments.
+    </p>
+
+    <p>
+      Fresh environment variables are created by evaluating the
+      expression <code>(make-environment-variable)</code>.
+    </p>
+
+    <p>Environments can be extended non-destructively to new
+      environments or can be modified in place (for subsequent
+      computations).
+    </p>
+
+    <p>
+      The <code>run</code> procedure creates a new empty environment
+      that is then threaded through the computation.
+    </p>
+
+    <p>
+      This SRFI provides the computation <code>(ask)</code>, which
+      yields the current environment.  Executing the
+      computation <code>(local <var>updater</var> <var>computation</var>)</code>
+      on an environment <var>env</var> means
+      executing <var>computation</var> on the
+      environment <code>(<var>updater</var> env)</code>.
+    </p>
+
+    <h1>Specification</h1>
+
+    <h2>Environment procedures</h2>
+
+    <p><code>(make-environment-variable)</code></p>
+
+    <p>Returns a Scheme object that can be used as an <dfn>environment
+      variable</dfn>.  The type of the returned object is unspecified.  Each
+      invocation returns an environment different to any previously
+      returned environment variable.
+    </p>
+
+    <p><code>(make-environment)</code></p>
+
+    <p>Returns a new <dfn>environment</dfn>, in which environment
+      variables can be bound to values.  The type of the returned
+      object is unspecified.
+    </p>
+
+    <p><code>(environment-ref <var>env</var> <var>var</var>)</code></p>
+
+    <p>If the variable <var>var</var> is bound to a value in the
+    environment <var>env</var>, returns that value,
+    and <code>#f</code> otherwise.</p>
+
+    <p><code>(environment-update <var>env</var> <var>var</var> <var>val</var>)</code></p>
+
+    <p>Returns a new environment that extends the
+      environment <var>env</var> by binding the
+      environment variable <var>var</var>
+      to <var>val</var>.
+    </p>
+
+    <p><code>(environment-update! <var>env</var> <var>var</var> <var>val</var>)</code></p>
+
+    <p>Updates the environment <var>env</var> in place by
+      binding the environment variable <var>var</var>
+      to <var>val</var>, and returns an unspecified value.
+    </p>
+
+    <p><code>(environment-copy <var>env</var>)</code></p>
+
+    <p>Returns a new copy of the
+      environment <var>env</var>.
+    </p>
+
+    <h2>Primitive monadic procedures</h2>
+
+    <p><code>(make-computation <var>proc</var>)</code></p>
+
+    <p>
+      Takes a procedure <var>proc</var>, which takes one argument, and
+      returns a <dfn>computation</dfn>.  The Scheme type of a
+      computation is either disjoint from any type as if created
+      by <code>define-record-type</code>, except possibly procedures.
+    </p>
+
+    <p>
+      When the computation is later <dfn>executed</dfn> on an
+      environment, the procedure <var>proc</var> is called with an
+      argument <var>compute</var>, which is a procedure taking one
+      argument.  Whenever <var>compute</var> is invoked on another
+      computation, the other computation is executed on the
+      environment and its results are returned.
+      The <dfn>results</dfn> yielded by the execution are the results
+      of the invocation of <var>proc</var>.
+    </p>
+
+    <p><code>(run <var>computation</var>)</code></p>
+
+    <p>
+      Executes the computation <var>computation</var> and returns the
+      results it yields.
+    </p>
+
+    <p><code>(ask)</code></p>
+
+    <p>
+      Returns a computation that, when executed on an environment,
+      yields that environment.
+    </p>
+
+    <p><code>(local <var>updater</var> <var>computation</var>)</code></p>
+
+    <p>
+      Returns a computation that, when executed on an
+      environment <var>env</var>, invokes the
+      procedure <var>updater</var> on <var>env</var>, executes the
+      computation <var>computation</var> on the result of the
+      invocation of <var>updater</var>, which must be an environment,
+      and yields its results.
+    </p>
+
+    <h2>Derived monadic procedures</h2>
+
+    <p><code>(return <var>obj<sub>1</sub></var> …)</code></p>
+
+    <p>
+      Returns a computation that, when executed, yields the
+      values <var>obj<sub>1</sub></var> ….
+    </p>
+
+    <p><code>(sequence <var>computation<sub>1</sub></var>
+	… <var>computation<sub>n</sub></var>)</code></p>
+
+    <p>
+      Returns a computation that, when executed, sequentially executes
+      the computations <var>computation<sub>1</sub></var>,
+      …, <var>computation<sub>n</sub></var> and yields the results
+      yielded by the last computation.
+    </p>
+
+    <p><code>(bind <var>computation</var> <var>proc<sub>1</sub></var> …)</code></p>
+
+    <p>
+      <code>(bind <var>computation</var>)</code> is equivalent
+      to <var>computation</var>.  <code>(bind <var>computation</var>
+	<var>proc<sub>1</sub></var> <var>proc<sub>2</sub></var>
+	…)</code> is equivalent to <code>(bind
+	(bind <var>computation</var> <var>proc<sub>1</sub></var>)
+	<var>proc<sub>2</sub></var> …)</code>.
+    </p>
+
+    <p>
+      The invocation of <code>(bind <var>computation</var> <var>proc</var>)</code>
+      returns a computation that, when executed, executes the
+      computation <var>computation</var>, on which results the
+      procedure <var>proc</var> is then invoked and that has to return
+      a computation, which is then executed and which results are yielded.
+    </p>
+
+    <p><code>(forked <var>computation<sub>1</sub></var>
+	… <var>computation<sub>n</sub></var>)</code></p>
+
+    <p>
+      Returns a computation that, when executed on an environment,
+      executes each of the
+      computation <var>computation<sub>1</sub></var>, … on fresh
+      copies of the environment, and finally
+      executes <var>computation<sub>n</sub></var> on the original
+      environment and yields its results.
+    </p>
+
+    <h2>Derived syntax</h2>
+
+    <p><code>(fn ((〈variable<sub>1</sub>〉 〈init<sub>1</sub>〉) …) 〈body〉)</code></p>
+
+    <p>
+      Evaluates the expressions 〈init<sub>1</sub>〉 … to environment
+      variables <var>var<sub>1</sub></var> … in an unspecified order and
+      returns a computation that, when executed, lexically binds the
+      variables 〈variable<sub>1</sub>〉 … to the values to which the
+      environment variables <var>var<sub>1</sub></var>, … are bound,
+      and evaluates the body 〈body〉 in the resulting lexical environment.
+      The value of the last expression in 〈body〉 has to be a computation,
+      which is then executed and its results are yielded.
+    </p>
+
+    <p>
+      An unbound environment variable behaves as if was bound
+      to <code>#f</code>.
+    </p>
+
+    <p><code>(with ((〈variable<sub>1</sub>〉 〈init<sub>1</sub>〉) …) 〈expr<sub>1</sub>〉 …
+	〈expr<sub>n</sub>〉)</code></p>
+    <p>
+      Evaluates the expressions 〈expr<sub>1</sub>〉 …
+      〈expr<sub>n</sub>〉 to
+      computations <var>computation<sub>1</sub></var>,
+      …, <var>computation<sub>n</sub></var>, the expressions
+      〈variable<sub>1</sub>〉 … to environment
+      variables <var>var<sub>1</sub></var> … and the expressions
+      〈init<sub>1</sub>〉 … to values <var>val<sub>1</sub></var> … in
+      an unspecified order, and returns a computation that, when
+      executed on an environment, extends that environment
+      non-destructively by binding <var>var<sub>1</sub></var>, …
+      to <var>val<sub>1</sub> …</var>, sequentially executes
+      the computations <var>computation<sub>1</sub></var>,
+      … <var>computation<sub>n</sub></var> on that extended
+      environment, and then yields the results of the last computation.
+    </p>
+
+    <p><code>(with! (〈variable<sub>1</sub>〉 〈init<sub>1</sub>〉) …)</code></p>
+
+    <p>
+      Evaluates the expressions 〈variable<sub>1</sub>〉 … to
+      environment variables <var>var<sub>1</sub></var> … and the
+      expressions 〈init<sub>1</sub>〉 … to
+      values <var>val<sub>1</sub></var> … in an unspecified order, and
+      returns a computation that, when executed on an environment,
+      modifies this environment in place by
+      binding <var>var<sub>1</sub></var>, … to <var>val<sub>1</sub>
+      …</var> and which yields an unspecified value.
+    </p>
+
+    <h2>Environment variables</h2>
+
+    <p><code>default-computation</code></p>
+
+    <p>This SRFI predefines one environment
+      variable, <code>default-computation</code>, which is initially
+      unbound.  Whenever an object <var>computation</var> is to be
+      executed on an environment and is neither a computation nor a
+      procedure, the value to which <code>default-computation</code>
+      is bound in the environment has to be a procedure, which is then
+      invoked on <var>computation</var> to return a
+      computation, which is then executed on the environment.
+    </p>
+    
+    <h1>Implementation</h1>
+
+    <p>The sample implementation is coded in portable R7RS scheme.  It
+      makes use of the (portable) SRFI 111, SRFI 125, SRFI 128, and
+      SRFI 146.  The testing code also uses SRFI 64.
+    </p>
+
+    <p>
+      <a href="srfi/165.scm">Source for the sample
+	implementation.</a>
+    </p>
+
+    <h1>Acknowledgements</h1>
+
+    <p>
+      This SRFI has been inspired by the <code>(chibi monad
+	environment)</code> library distributed by Alex Shinn's Chibi
+	Scheme and by SRFI 159, also by Alex Shinn.
+    </p>
+
+    <p>
+      The environment monad is called the <em>Reader</em> monad in Mark P. Jones'
+      <i>Functional Programming with Overloading and Higher-Order
+Polymorphism</i>, Advanced School of Functional Programming, 1995.
+    </p>
+
+    <p>
+      The notion of monads was invented by Roger Godement under the
+      name <em>standard construction</em>.  They are also known
+      as <em>triples</em>.  The term <em>monad</em> is due to Saunders
+      Mac Lane.
+    </p>
+
+    <h1>Copyright</h1>
+    Copyright (C) Marc Nieper-Wißkirchen (2019).
+
+    <p>
+      Permission is hereby granted, free of charge, to any person
+      obtaining a copy of this software and associated documentation files
+      (the "Software"), to deal in the Software without restriction,
+      including without limitation the rights to use, copy, modify, merge,
+      publish, distribute, sublicense, and/or sell copies of the Software,
+      and to permit persons to whom the Software is furnished to do so,
+      subject to the following conditions:
+
+    <p>
+      The above copyright notice and this permission notice shall be
+      included in all copies or substantial portions of the Software.
+
+    <p>
+      THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+      EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+      MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+      NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS
+      BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN
+      ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+      CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+      SOFTWARE.
+
+      <hr>
+      <address>Editor: <a
+href="mailto:srfi-editors+at+srfi+dot+schemers+dot+org">Arthur A.
+Gleckler</a></address></body></html>
