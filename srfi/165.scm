@@ -168,10 +168,9 @@
 (define (forked a . a*)
   (make-computation
    (lambda (compute)
-     (let ((copy (environment-copy (compute (ask)))))
-       (let loop ((a a) (a* a*))
-	 (if (null? a*)
-	     (compute a)
-	     (begin
-	       (compute (local (lambda (env) copy) a))
-	       (loop (car a*) (cdr a*)))))))))
+     (let loop ((a a) (a* a*))
+       (if (null? a*)
+	   (compute a)
+	   (begin
+	     (compute (local (lambda (env) (environment-copy env)) a))
+	     (loop (car a*) (cdr a*))))))))
