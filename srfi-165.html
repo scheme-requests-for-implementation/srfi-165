@@ -47,26 +47,25 @@
       </li>
       <li>
 	<p>
-	  This SRFI defines an interface, on which SRFIs like SRFI 159
+	  This SRFI defines an interface on which SRFIs like SRFI 159
 	  are supposed to be built.  There is a conceptual difference
 	  between SRFI 159 and this SRFI, though.  The environment
-	  variables of SRFI 159 are raw symbols, that, while making
-	  them easy to use in simple cases, do not respect lexical
+	  variables of SRFI 159 are raw symbols, which makes them easy
+	  to use in simple cases, but they do not respect lexical
 	  scope and are entirely unhygienic.  The environment
 	  variables of this SRFI are like the parameters objects of
 	  SRFI 39, which are lexically scoped and can participate in
 	  the name-spacing provided by R7RS's library system and in
-	  Scheme's macro hygiene.  It is therefore recommended to
-	  amend SRFI 159 so that it based on the infrastructure of
-	  this SRFI and does not use raw symbols.
-	</p>
+	  Scheme's macro hygiene.  We therefore recommend that SRFI
+	  159 be amended so that is based on the infrastructure of
+	  this SRFI and does not use raw symbols.</p>
 
 	<p>
 	  The alternative would be to allow also raw symbols as
 	  environment variables in this SRFI (and to change the syntax
 	  of <code>fn</code>, <code>with</code> and <code>with!</code>
 	  accordingly).  While this has the advantage of being
-	  compatible to SRFI 159 as written, it has the drawback that
+	  compatible with SRFI 159 as written, it has the drawback that
 	  it encourages the use of raw symbols to denote environment
 	  variables, leading to non-composable computations and to
 	  leaking of internal implementation details.
@@ -100,7 +99,7 @@
 
     <p>
       As there are already many good explanations for monads in
-      computer science and as understanding the mathematical concept
+      computer science, and as understanding the mathematical concept
       in detail is not necessary to work with this SRFI, we refrain
       from repeating the theoretical foundations.  We just want to
       remark that the
@@ -109,7 +108,7 @@
       morphisms <var>m</var> → <var>n</var> are Scheme procedures
       taking <var>m</var> values and returning <var>n</var> values.
       Moreover, what is called the environment monad here and
-      somewhere else is called the <em>Reader</em> monad in Haskell.
+      elsewhere is called the <em>Reader</em> monad in Haskell.
     </p>
 
     <p>
@@ -265,8 +264,8 @@
     <p>
       Takes a procedure <var>proc</var>, which takes one argument, and
       returns a <dfn>computation</dfn>.  The Scheme type of a
-      computation is either disjoint from any type as if created
-      by <code>define-record-type</code>, except possibly procedures.
+      computation is disjoint from any type, as if created by
+      <code>define-record-type</code>, except possibly procedures.
     </p>
 
     <p>
