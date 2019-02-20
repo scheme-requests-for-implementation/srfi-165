@@ -172,5 +172,13 @@
       (test-eqv 42
 	(run (with ((default-computation return))
 	       42)))
+
+
+      (test-eqv 42
+	(let ((x (make-environment-variable)))
+	  (run (with ((x 10))
+		 (with ((x 42))
+		   (fn ((x x))
+		     (return x))))))) 
       
       (test-end))))
