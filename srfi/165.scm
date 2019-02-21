@@ -51,7 +51,7 @@
 
 (define (environment-update env var val)
   (%make-environment (environment-global env)
-		     (mapping-adjoin (environment-local env) var (box val))))
+		     (mapping-set (environment-local env) var (box val))))
 
 (define (environment-update! env var val)
   (mapping-ref (environment-local env)
