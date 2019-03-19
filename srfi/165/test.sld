@@ -115,13 +115,13 @@
       (test-equal '(42 (b a))
 	(let* ((acc '())
 	       (result
-		(run (sequence (make-computation
-				(lambda (compute)
-				  (set! acc (cons 'a acc))))
-			       (make-computation
-				(lambda (compute)
-				  (set! acc (cons 'b acc))
-				  42))))))
+		(run (each (make-computation
+			    (lambda (compute)
+			      (set! acc (cons 'a acc))))
+			   (make-computation
+			    (lambda (compute)
+			      (set! acc (cons 'b acc))
+			      42))))))
 	  (list result acc)))
 
       (test-equal 83
@@ -151,17 +151,17 @@
 
       (test-eqv #f
 	(let ((x (make-environment-variable)))
-	  (run (sequence (with ((x 42))
-			   (fn ((y x))
-			     (pure y)))
-			 (fn ((y x))
-			   (pure y))))))
+	  (run (each (with ((x 42))
+		       (fn ((y x))
+			 (pure y)))
+		     (fn ((y x))
+		       (pure y))))))
 
       (test-eqv 42
 	(let ((x (make-environment-variable)))
-	  (run (sequence (with! (x 42))
-			 (fn ((y x))
-			   (pure y))))))
+	  (run (each (with! (x 42))
+		     (fn ((y x))
+		       (pure y))))))
 
       (test-eqv #f
 	(let ((x (make-environment-variable)))

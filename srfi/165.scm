@@ -87,7 +87,7 @@
    (lambda (compute)
      (apply values args))))
 
-(define (sequence a . a*)
+(define (each a . a*)
   (make-computation
    (lambda (compute)
      (let loop ((a a) (a* a*))
@@ -144,7 +144,7 @@
        (local (lambda (env)
 		(let* ((env (environment-update env u v)) ...)
 		  env))
-	 (sequence b ...))))
+	 (each b ...))))
     ((_ ((var val) . rest) (p ...) () a* ...)
      (%with rest (p ... (var u val v)) () a* ...))
     ((_ () p* (q ...) a . a*)
