@@ -182,6 +182,14 @@
 		       (fn ((y x))
 			 (pure y))))))
 
+      (test-equal (list #f 2)
+	(let ((x (make-environment-variable)))
+	  (run (bind/forked (each (with! (x 42))
+				  (pure 2))
+			    (lambda (z)
+			      (fn ((y x))
+				(pure (list y z))))))))
+
       (test-eqv 42
 	(run (with ((default-computation pure))
 	       42)))

@@ -177,3 +177,8 @@
 	   (begin
 	     (compute (local (lambda (env) (environment-copy env)) a))
 	     (loop (car a*) (cdr a*))))))))
+
+(define (bind/forked computation . proc*)
+  (apply bind
+	 (local environment-copy computation)
+	 proc*))

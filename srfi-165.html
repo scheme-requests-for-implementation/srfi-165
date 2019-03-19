@@ -371,6 +371,14 @@
       environment and yields its results.
     </p>
 
+    <p><code>(bind/forked <var>computation</var> <var>proc<sub>1</sub></var> …)</code></p>
+
+    <p>
+      As <code>(bind <var>computation</var> <var>proc<sub>1</sub></var>
+      …)</code>, but executes <var>computation</var> on a fresh copy
+      of the environment.
+    </p>
+
     <h2>Derived syntax</h2>
 
     <p><code>(fn ((〈variable<sub>1</sub>〉 〈init<sub>1</sub>〉) …) 〈body〉)</code></p>

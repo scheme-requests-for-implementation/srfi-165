@@ -25,7 +25,7 @@
 	  make-environment environment-ref environment-update
 	  environment-update! environment-copy
 	  make-computation each each-in-list pure bind run ask local
-	  fn with with! forked
+	  fn with with! forked bind/forked
 	  default-computation)
   (import (scheme base)
 	  (srfi 111)
