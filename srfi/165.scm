@@ -88,9 +88,12 @@
      (apply values args))))
 
 (define (each a . a*)
-  (make-computation
+  (each-in-list (cons a a*)))
+
+(define (each-in-list a*)
+ (make-computation
    (lambda (compute)
-     (let loop ((a a) (a* a*))
+     (let loop ((a (car a*)) (a* (cdr a*)))
        (if (null? a*)
 	   (compute a)
 	   (begin

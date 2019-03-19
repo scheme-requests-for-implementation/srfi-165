@@ -124,6 +124,19 @@
 			      42))))))
 	  (list result acc)))
 
+      (test-equal '(42 (b a))
+	(let* ((acc '())
+	       (result
+		(run (each-in-list
+		      (list (make-computation
+			     (lambda (compute)
+			       (set! acc (cons 'a acc))))
+			    (make-computation
+			     (lambda (compute)
+			       (set! acc (cons 'b acc))
+			       42)))))))
+	  (list result acc)))
+
       (test-equal 83
 	(run (bind (pure 42)
 		   (lambda (x)

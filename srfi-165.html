@@ -330,6 +330,16 @@
       yielded by the last computation.
     </p>
 
+    <p><code>(each-in-list <var>list</var>)</code></p>
+
+    <p>
+      Equivalent to <code>(each <var>computation<sub>1</sub></var>
+	… <var>computation<sub>n</sub></var>)</code>
+	if <var>list</var> is a list whose elements
+	are <var>computation<sub>1</sub></var>,
+	…, <var>computation<sub>n</sub></var>.
+    </p>
+
     <p><code>(bind <var>computation</var> <var>proc<sub>1</sub></var> …)</code></p>
 
     <p>

@@ -24,7 +24,7 @@
   (export make-environment-variable
 	  make-environment environment-ref environment-update
 	  environment-update! environment-copy
-	  make-computation each pure bind run ask local
+	  make-computation each each-in-list pure bind run ask local
 	  fn with with! forked
 	  default-computation)
   (import (scheme base)
