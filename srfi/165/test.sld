@@ -80,7 +80,7 @@
 	      (env (make-environment)))
 	  (environment-update! (environment-update env y 10) x 42)
 	  (environment-ref env x)))
-      
+
       (test-eqv 42
 	(let* ((x (make-environment-variable))
 	       (env (environment-update (make-environment) x 42))
@@ -94,7 +94,7 @@
 	   (lambda (compute)
 	     (set! flag #t)))
 	  flag))
-      
+
       (test-eqv 42
 	(run (make-computation
 	      (lambda (compute)
@@ -103,15 +103,15 @@
       (test-eqv 42
 	(run (make-computation
 	      (lambda (compute)
-		(compute (return 42))))))
+		(compute (pure 42))))))
 
       (test-equal '(10 42)
 	(call-with-values
 	    (lambda () (run (make-computation
 			     (lambda (compute)
-			       (compute (return 10 42))))))
+			       (compute (pure 10 42))))))
 	  list))
-      
+
       (test-equal '(42 (b a))
 	(let* ((acc '())
 	       (result
@@ -125,11 +125,11 @@
 	  (list result acc)))
 
       (test-equal 83
-	(run (bind (return 42)
+	(run (bind (pure 42)
 		   (lambda (x)
-		     (return (* x 2)))
+		     (pure (* x 2)))
 		   (lambda (x)
-		     (return (- x 1))))))
+		     (pure (- x 1))))))
 
       (test-equal '(42 #f)
 	(let ((x (make-environment-variable)))
@@ -140,37 +140,37 @@
 				     (environment-update env x 42))
 			      (bind (ask)
 				    (lambda (env)
-				      (return (environment-ref env x))))))))
+				      (pure (environment-ref env x))))))))
 		    (list a (environment-ref (compute (ask)) x))))))))
 
       (test-eqv 42
 	(let ((x (make-environment-variable)))
 	  (run (with ((x 42))
 		 (fn ((y x))
-		   (return y))))))
+		   (pure y))))))
 
       (test-eqv #f
 	(let ((x (make-environment-variable)))
 	  (run (sequence (with ((x 42))
 			   (fn ((y x))
-			     (return y)))
+			     (pure y)))
 			 (fn ((y x))
-			   (return y))))))
+			   (pure y))))))
 
       (test-eqv 42
 	(let ((x (make-environment-variable)))
 	  (run (sequence (with! (x 42))
 			 (fn ((y x))
-			   (return y))))))
+			   (pure y))))))
 
       (test-eqv #f
 	(let ((x (make-environment-variable)))
 	  (run (forked (with! (x 42))
 		       (fn ((y x))
-			 (return y))))))
+			 (pure y))))))
 
       (test-eqv 42
-	(run (with ((default-computation return))
+	(run (with ((default-computation pure))
 	       42)))
 
 
@@ -179,6 +179,6 @@
 	  (run (with ((x 10))
 		 (with ((x 42))
 		   (fn ((x x))
-		     (return x))))))) 
-      
+		     (pure x)))))))
+
       (test-end))))

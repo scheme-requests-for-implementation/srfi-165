@@ -82,7 +82,7 @@
 (define (run computation)
   (execute computation (make-environment)))
 
-(define (return . args)
+(define (pure . args)
   (make-computation
    (lambda (compute)
      (apply values args))))
@@ -161,7 +161,7 @@
      (let ((u var) ... (v val) ...)
        (bind (ask) (lambda (env)
 		     (environment-update! env u v) ...
-		     (return (if #f #f))))))
+		     (pure (if #f #f))))))
     ((_ (var val) r ... (p ...))
      (%with! r ... (p ... (var u val v))))))
 
