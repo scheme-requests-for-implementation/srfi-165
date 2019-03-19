@@ -359,6 +359,17 @@
       a computation, which is then executed and which results are yielded.
     </p>
 
+    <p>
+      <code>(sequence <var>list</var>)</code>
+    </p>
+
+    <p>
+      When invoked on a list <var>list</var> of computations, returns
+      a computation that, when executed, executes the computations in
+      sequence and yields a list whose elements are the results
+      yielded by the computations.
+    </p>
+
     <p><code>(forked <var>computation<sub>1</sub></var>
 	… <var>computation<sub>n</sub></var>)</code></p>
 
@@ -448,8 +459,8 @@
     <h1>Implementation</h1>
 
     <p>The sample implementation is coded in portable R7RS scheme.  It
-      makes use of the (portable) SRFI 111, SRFI 125, SRFI 128, and
-      SRFI 146.  The testing code also uses SRFI 64.
+      makes use of the (portable) SRFI 1, SRFI 111, SRFI 125, SRFI
+      128, and SRFI 146.  The testing code also uses SRFI 64.
     </p>
 
     <p>

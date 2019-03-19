@@ -24,10 +24,11 @@
   (export make-environment-variable
 	  make-environment environment-ref environment-update
 	  environment-update! environment-copy
-	  make-computation each each-in-list pure bind run ask local
+	  make-computation each each-in-list pure bind sequence run ask local
 	  fn with with! forked bind/forked
 	  default-computation)
   (import (scheme base)
+	  (srfi 1)
 	  (srfi 111)
 	  (srfi 125)
 	  (srfi 128)

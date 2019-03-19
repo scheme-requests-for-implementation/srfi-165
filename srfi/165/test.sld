@@ -144,6 +144,11 @@
 		   (lambda (x)
 		     (pure (- x 1))))))
 
+      (test-equal (list 42 84)
+	(run (sequence (list (pure 42)
+			     (pure 84)))))
+
+
       (test-equal '(42 #f)
 	(let ((x (make-environment-variable)))
 	  (run (make-computation

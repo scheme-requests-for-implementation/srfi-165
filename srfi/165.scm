@@ -182,3 +182,12 @@
   (apply bind
 	 (local environment-copy computation)
 	 proc*))
+
+(define (sequence fmt*)
+  (fold-right (lambda (fmt res)
+		(bind res
+		  (lambda (vals)
+		    (bind fmt
+		      (lambda (val)
+			(pure (cons val vals)))))))
+	      (pure '()) fmt*))
