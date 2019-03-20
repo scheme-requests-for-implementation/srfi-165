@@ -457,14 +457,18 @@
 
     <p><code>default-computation</code></p>
 
-    <p>This SRFI predefines one environment
-      variable, <code>default-computation</code>, which is initially
-      unbound.  Whenever an object <var>computation</var> is to be
+    <p>This SRFI exports the
+      identifier <code>default-computation</code>, which is bound to a
+      location holding an environment variable (as if created
+      by <code>(make-computation-environment-variable)</code>) in the
+      sense of this SRFI.  In each fresh computation
+      environment, <code>default-computation</code> is initially
+      unbound.  Whenever a computation <var>computation</var> is to be
       executed on an environment and is neither a computation nor a
       procedure, the value to which <code>default-computation</code>
       is bound in the environment has to be a procedure, which is then
-      invoked on <var>computation</var> to return a
-      computation, which is then executed on the environment.
+      invoked on <var>computation</var> to return a computation, which
+      is then executed on the environment.
     </p>
 
     <h1>Implementation</h1>
