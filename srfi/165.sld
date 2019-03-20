@@ -21,11 +21,15 @@
 ;; SOFTWARE.
 
 (define-library (srfi 165)
-  (export make-environment-variable
-	  make-environment environment-ref environment-update
-	  environment-update! environment-copy
-	  make-computation each each-in-list pure bind sequence run ask local
-	  fn with with! forked bind/forked
+  (export make-computation-environment-variable
+	  make-computation-environment computation-environment-ref
+	  computation-environment-update
+	  computation-environment-update! computation-environment-copy
+	  make-computation computation-each computation-each-in-list
+	  computation-pure computation-bind computation-sequence
+	  computation-run computation-ask computation-local
+	  computation-fn computation-with computation-with!
+	  computation-forked computation-bind/forked
 	  default-computation)
   (import (scheme base)
 	  (srfi 1)

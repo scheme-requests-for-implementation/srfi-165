@@ -22,12 +22,14 @@
 
 ((scheme-mode
   (eval progn
-	(put 'with 'scheme-indent-function 1)
-	(put 'with! 'scheme-indent-function 0)
-	(put 'fn 'scheme-indent-function 1)
-	(put 'sequence 'scheme-indent-function 0)
+	(put 'computation-with 'scheme-indent-function 1)
+	(put 'computation-with! 'scheme-indent-function 0)
+	(put 'computation-fn 'scheme-indent-function 1)
+	(put 'computation-each 'scheme-indent-function 0)
+	(put 'computation-bind 'scheme-indent-function 1)
+	(put 'computation-local 'scheme-indent-function 1)
 	(font-lock-add-keywords
 	 nil
-	 '(("(\\(with\\)\\>" 1 font-lock-keyword-face)
-	   ("(\\(with!\\)\\>" 1 font-lock-keyword-face)
-	   ("(\\(fn\\))\\>" 1 font-lock-keyword-face))))))
+	 '(("(\\(computation-with\\)\\>" 1 font-lock-keyword-face)
+	   ("(\\(computation-with!\\)\\>" 1 font-lock-keyword-face)
+	   ("(\\(computation-fn\\))\\>" 1 font-lock-keyword-face))))))

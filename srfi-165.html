@@ -20,7 +20,16 @@
 
     <h1>Status</h1>
 
-    <p>This SRFI is currently in <em>draft</em> status.  Here is <a href="https://srfi.schemers.org/srfi-process.html">an explanation</a> of each status that a SRFI can hold.  To provide input on this SRFI, please send email to <code><a href="mailto:srfi+minus+165+at+srfi+dotschemers+dot+org">srfi-165@<span class="antispam">nospam</span>srfi.schemers.org</a></code>.  To subscribe to the list, follow <a href="https://srfi.schemers.org/srfi-list-subscribe.html">these instructions</a>.  You can access previous messages via the mailing list <a href="https://srfi-email.schemers.org/srfi-165">archive</a>.</p>
+    <p>This SRFI is currently in <em>draft</em> status.  Here
+    is <a href="https://srfi.schemers.org/srfi-process.html">an
+    explanation</a> of each status that a SRFI can hold.  To provide
+    input on this SRFI, please send email
+    to <code><a href="mailto:srfi+minus+165+at+srfi+dotschemers+dot+org">srfi-165@<span class="antispam">nospam</span>srfi.schemers.org</a></code>.
+    To subscribe to the list,
+    follow <a href="https://srfi.schemers.org/srfi-list-subscribe.html">these
+    instructions</a>.  You can access previous messages via the
+    mailing
+    list <a href="https://srfi-email.schemers.org/srfi-165">archive</a>.</p>
     <ul>
       <li>Received: 2019/2/13</li>
       <li>60-day deadline: 2019/4/14</li>
@@ -143,15 +152,16 @@
     </p>
 
     <p>
-      The simplest computation is <code>(pure <var>val<sub>1</sub>
-	  …)</code>, which just yields the
-	  results <var>val<sub>1</sub></var> … when executed.
+      The simplest computation
+      is <code>(computation-pure <var>val<sub>1</sub> …)</code>,
+      which just yields the results <var>val<sub>1</sub></var> …
+      when executed.
     </p>
 
     <p>
       This SRFI provides a number of combinators that combine
       computations.  For
-      example <code>(each <var>computation<sub>1</sub></var>
+      example <code>(computation-each <var>computation<sub>1</sub></var>
       … <var>computation<sub>n</sub></var>)</code> is the computation
       formed by applying each <var>computation<sub>1</sub></var>,
       …, <var>computation<sub>n</sub></var> in sequence and eventually
@@ -161,7 +171,7 @@
     <p>
       Another combinator known from monads in functional programming
       is the computation
-      <code>(bind <var>computation</var> <var>proc</var>)</code>,
+      <code>(computation-bind <var>computation</var> <var>proc</var>)</code>,
       which is the computation formed by feeding the results yielded
       by <var>computation</var> to <var>proc</var> and yielding the
       results of the computation returned by the invocation
@@ -169,8 +179,9 @@
     </p>
 
     <p>Computations are executed by <code>run</code>.  The
-      expression <code>(run <var>computation</var>)</code> returns the
-      values yielded by the execution of <var>computation</var>.
+      expression <code>(computation-run <var>computation</var>)</code>
+      returns the values yielded by the execution
+      of <var>computation</var>.
     </p>
 
     <p>The primary constructor for computations
@@ -196,7 +207,7 @@
 
     <p>
       Fresh environment variables are created by evaluating the
-      expression <code>(make-environment-variable)</code>.
+      expression <code>(make-computation-environment-variable)</code>.
     </p>
 
     <p>Environments can be extended non-destructively to new
@@ -205,14 +216,14 @@
     </p>
 
     <p>
-      The <code>run</code> procedure creates a new empty environment
+      The <code>computation-run</code> procedure creates a new empty environment
       that is then threaded through the computation.
     </p>
 
     <p>
       This SRFI provides the computation <code>(ask)</code>, which
       yields the current environment.  Executing the
-      computation <code>(local <var>updater</var> <var>computation</var>)</code>
+      computation <code>(computation-local <var>updater</var> <var>computation</var>)</code>
       on an environment <var>env</var> means
       executing <var>computation</var> on the
       environment <code>(<var>updater</var> env)</code>.
@@ -222,7 +233,7 @@
 
     <h2>Environment procedures</h2>
 
-    <p><code>(make-environment-variable)</code></p>
+    <p><code>(make-computation-environment-variable)</code></p>
 
     <p>Returns a Scheme object that can be used as an <dfn>environment
       variable</dfn>.  The type of the returned object is unspecified.  Each
@@ -230,20 +241,20 @@
       returned environment variable.
     </p>
 
-    <p><code>(make-environment)</code></p>
+    <p><code>(make-computation-environment)</code></p>
 
     <p>Returns a new <dfn>environment</dfn>, in which environment
       variables can be bound to values.  The type of the returned
       object is unspecified.
     </p>
 
-    <p><code>(environment-ref <var>env</var> <var>var</var>)</code></p>
+    <p><code>(computation-environment-ref <var>env</var> <var>var</var>)</code></p>
 
     <p>If the variable <var>var</var> is bound to a value in the
     environment <var>env</var>, returns that value,
     and <code>#f</code> otherwise.</p>
 
-    <p><code>(environment-update <var>env</var> <var>var</var> <var>val</var>)</code></p>
+    <p><code>(computation-environment-update <var>env</var> <var>var</var> <var>val</var>)</code></p>
 
     <p>Returns a new environment that extends the
       environment <var>env</var> by binding the
@@ -251,16 +262,16 @@
       to <var>val</var>.
     </p>
 
-    <p><code>(environment-update! <var>env</var> <var>var</var> <var>val</var>)</code></p>
+    <p><code>(computation-environment-update! <var>env</var> <var>var</var> <var>val</var>)</code></p>
 
     <p>Updates the environment <var>env</var> in place by
       binding the environment variable <var>var</var>
       to <var>val</var>, and returns an unspecified value.
     </p>
 
-    <p><code>(environment-copy <var>env</var>)</code></p>
+    <p><code>(computation-environment-copy <var>env</var>)</code></p>
 
-    <p>Returns a new copy of the
+    <p>Returns a fresh copy of the
       environment <var>env</var>.
     </p>
 
@@ -286,21 +297,21 @@
       of the invocation of <var>proc</var>.
     </p>
 
-    <p><code>(run <var>computation</var>)</code></p>
+    <p><code>(computation-run <var>computation</var>)</code></p>
 
     <p>
       Executes the computation <var>computation</var> and returns the
       results it yields.
     </p>
 
-    <p><code>(ask)</code></p>
+    <p><code>(computation-ask)</code></p>
 
     <p>
       Returns a computation that, when executed on an environment,
       yields that environment.
     </p>
 
-    <p><code>(local <var>updater</var> <var>computation</var>)</code></p>
+    <p><code>(computation-local <var>updater</var> <var>computation</var>)</code></p>
 
     <p>
       Returns a computation that, when executed on an
@@ -313,14 +324,14 @@
 
     <h2>Derived monadic procedures</h2>
 
-    <p><code>(pure <var>obj<sub>1</sub></var> …)</code></p>
+    <p><code>(computation-pure <var>obj<sub>1</sub></var> …)</code></p>
 
     <p>
       Returns a computation that, when executed, yields the
       values <var>obj<sub>1</sub></var> ….
     </p>
 
-    <p><code>(each <var>computation<sub>1</sub></var>
+    <p><code>(computation-each <var>computation<sub>1</sub></var>
 	… <var>computation<sub>n</sub></var>)</code></p>
 
     <p>
@@ -330,29 +341,29 @@
       yielded by the last computation.
     </p>
 
-    <p><code>(each-in-list <var>list</var>)</code></p>
+    <p><code>(computation-each-in-list <var>list</var>)</code></p>
 
     <p>
-      Equivalent to <code>(each <var>computation<sub>1</sub></var>
+      Equivalent to <code>(computation-each <var>computation<sub>1</sub></var>
 	… <var>computation<sub>n</sub></var>)</code>
 	if <var>list</var> is a list whose elements
 	are <var>computation<sub>1</sub></var>,
 	…, <var>computation<sub>n</sub></var>.
     </p>
 
-    <p><code>(bind <var>computation</var> <var>proc<sub>1</sub></var> …)</code></p>
+    <p><code>(computation-bind <var>computation</var> <var>proc<sub>1</sub></var> …)</code></p>
 
     <p>
-      <code>(bind <var>computation</var>)</code> is equivalent
-      to <var>computation</var>.  <code>(bind <var>computation</var>
+      <code>(computation-bind <var>computation</var>)</code> is equivalent
+      to <var>computation</var>.  <code>(computation-bind <var>computation</var>
 	<var>proc<sub>1</sub></var> <var>proc<sub>2</sub></var>
-	…)</code> is equivalent to <code>(bind
-	(bind <var>computation</var> <var>proc<sub>1</sub></var>)
+	…)</code> is equivalent to <code>(computation-bind
+	(computation-bind <var>computation</var> <var>proc<sub>1</sub></var>)
 	<var>proc<sub>2</sub></var> …)</code>.
     </p>
 
     <p>
-      The invocation of <code>(bind <var>computation</var> <var>proc</var>)</code>
+      The invocation of <code>(computation-bind <var>computation</var> <var>proc</var>)</code>
       returns a computation that, when executed, executes the
       computation <var>computation</var>, on which results the
       procedure <var>proc</var> is then invoked and that has to return
@@ -360,7 +371,7 @@
     </p>
 
     <p>
-      <code>(sequence <var>list</var>)</code>
+      <code>(computation-sequence <var>list</var>)</code>
     </p>
 
     <p>
@@ -370,7 +381,7 @@
       yielded by the computations.
     </p>
 
-    <p><code>(forked <var>computation<sub>1</sub></var>
+    <p><code>(computation-forked <var>computation<sub>1</sub></var>
 	… <var>computation<sub>n</sub></var>)</code></p>
 
     <p>
@@ -382,17 +393,17 @@
       environment and yields its results.
     </p>
 
-    <p><code>(bind/forked <var>computation</var> <var>proc<sub>1</sub></var> …)</code></p>
+    <p><code>(computation-bind/forked <var>computation</var> <var>proc<sub>1</sub></var> …)</code></p>
 
     <p>
-      As <code>(bind <var>computation</var> <var>proc<sub>1</sub></var>
+      As <code>(computation-bind <var>computation</var> <var>proc<sub>1</sub></var>
       …)</code>, but executes <var>computation</var> on a fresh copy
       of the environment.
     </p>
 
     <h2>Derived syntax</h2>
 
-    <p><code>(fn ((〈variable<sub>1</sub>〉 〈init<sub>1</sub>〉) …) 〈body〉)</code></p>
+    <p><code>(computation-fn ((〈variable<sub>1</sub>〉 〈init<sub>1</sub>〉) …) 〈body〉)</code></p>
 
     <p>
       Evaluates the expressions 〈init<sub>1</sub>〉 … to environment
@@ -410,7 +421,7 @@
       to <code>#f</code>.
     </p>
 
-    <p><code>(with ((〈variable<sub>1</sub>〉 〈init<sub>1</sub>〉) …) 〈expr<sub>1</sub>〉 …
+    <p><code>(computation-with ((〈variable<sub>1</sub>〉 〈init<sub>1</sub>〉) …) 〈expr<sub>1</sub>〉 …
 	〈expr<sub>n</sub>〉)</code></p>
     <p>
       Evaluates the expressions 〈expr<sub>1</sub>〉 …
@@ -429,7 +440,7 @@
       environment, and then yields the results of the last computation.
     </p>
 
-    <p><code>(with! (〈variable<sub>1</sub>〉 〈init<sub>1</sub>〉) …)</code></p>
+    <p><code>(computation-with! (〈variable<sub>1</sub>〉 〈init<sub>1</sub>〉) …)</code></p>
 
     <p>
       Evaluates the expressions 〈variable<sub>1</sub>〉 … to
