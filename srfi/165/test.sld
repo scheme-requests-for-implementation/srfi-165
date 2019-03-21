@@ -178,6 +178,12 @@
 			     (computation-fn ((y x))
 			       (computation-pure y))))))
 
+      (test-eqv 42
+	(let ((x (make-computation-environment-variable)))
+	  (computation-run (computation-with ((x 42))
+			     (computation-fn (x)
+			       (computation-pure x))))))
+
       (test-eqv #f
 	(let ((x (make-computation-environment-variable)))
 	  (computation-run (computation-each (computation-with ((x 42))

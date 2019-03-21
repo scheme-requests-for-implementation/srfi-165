@@ -124,8 +124,8 @@
 
 (define-syntax computation-fn
   (syntax-rules ()
-    ((_ ((id var) ...) expr ... computation)
-     (%fn ((id var) ...) () expr ... computation))))
+    ((_ (clause ...) expr ... computation)
+     (%fn (clause ...) () expr ... computation))))
 
 (define-syntax %fn
   (syntax-rules ()
@@ -137,7 +137,9 @@
 	     expr ...
 	     computation)))))
     ((_ ((id var) . rest) (p ...) expr ... computation)
-     (%fn rest (p ... (id var tmp)) expr ... computation))))
+     (%fn rest (p ... (id var tmp)) expr ... computation))
+    ((_ (id . rest) (p ...) expr ... computation)
+     (%fn rest (p ... (id id tmp)) expr ... computation))))
 
 (define-syntax computation-with
   (syntax-rules ()
