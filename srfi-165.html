@@ -63,28 +63,8 @@
       </li>
       <li>
 	<p>
-	  This SRFI defines an interface on which SRFIs like SRFI 159
-	  are supposed to be built.  There is a conceptual difference
-	  between SRFI 159 and this SRFI, though.  The environment
-	  variables of SRFI 159 are raw symbols, which makes them easy
-	  to use in simple cases, but they do not respect lexical
-	  scope and are entirely unhygienic.  The environment
-	  variables of this SRFI are like the parameters objects of
-	  SRFI 39, which are lexically scoped and can participate in
-	  the name-spacing provided by R7RS's library system and in
-	  Scheme's macro hygiene.  We therefore recommend that SRFI
-	  159 be amended so that is based on the infrastructure of
-	  this SRFI and does not use raw symbols.</p>
-
-	<p>
-	  The alternative would be to allow also raw symbols as
-	  environment variables in this SRFI (and to change the syntax
-	  of <code>fn</code>, <code>with</code> and <code>with!</code>
-	  accordingly).  While this has the advantage of being
-	  compatible with SRFI 159 as written, it has the drawback that
-	  it encourages the use of raw symbols to denote environment
-	  variables, leading to non-composable computations and to
-	  leaking of internal implementation details.
+	  This SRFI refers to SRFI 166, which has not been published
+	  yet.
 	</p>
       </li>
     </ul>
@@ -92,14 +72,33 @@
     <h1>Rationale</h1>
 
     <p>The environment monad is useful whenever code has to be
-      suspended and executed at a later time (even several times) and
+      suspended and executed at a later time (even several times), and
       whenever code depends (implicitly) on bindings of variables in a
       shared environment.
     </p>
 
     <p>
-      SRFI 159 is a major use case of the environment monad and a good
-      example of the concept in practice.
+      SRFI 166, a forthcoming revision of the combinator formatting
+      SRFI 159, is a major use case of the environment monad and a
+      good example of the concept in practice.  The formatters in SRFI
+      166 are computations in the nomenclature of this SRFI.  In
+      particular, the properties for computations apply to formatters
+      as well and the primitive and the derived procedures of this
+      SRFI can be used to construct sophisticated formatters of SRFI
+      166.
+    </p>
+
+    <p>
+      Nonetheless, SRFI 165 is an independent SRFI and not a proper
+      part of SRFI 166 for two reasons: Firstly, the SRFI 166's
+      combinator formatters are just one use case for the environment
+      monad of SRFI 165, so one wants to be able to use the procedures
+      and syntax specified in this SRFI independently of
+      formatting. Secondly, this SRFI exports more primitive and
+      derived procedures for the environment monad and computations
+      than are usually needed to write simple SRFI 166 formatters, so
+      including them all in SRFI 166 would shift away the focus
+      of SRFI 166 too much from its genuine purpose, formatting.
     </p>
 
     <h2>Monads</h2>
@@ -178,7 +177,7 @@
       of <var>proc</var>.
     </p>
 
-    <p>Computations are executed by <code>run</code>.  The
+    <p>Computations are executed by <code>computation-run</code>.  The
       expression <code>(computation-run <var>computation</var>)</code>
       returns the values yielded by the execution
       of <var>computation</var>.
@@ -221,8 +220,9 @@
     </p>
 
     <p>
-      This SRFI provides the computation <code>(ask)</code>, which
-      yields the current environment.  Executing the
+      This SRFI provides the
+      computation <code>(computation-ask)</code>, which yields the
+      current environment.  Executing the
       computation <code>(computation-local <var>updater</var> <var>computation</var>)</code>
       on an environment <var>env</var> means
       executing <var>computation</var> on the
@@ -417,6 +417,13 @@
     </p>
 
     <p>
+      A <dfn>clause</dfn> of the form <code>(〈variable〉
+      〈variable〉)</code> (i.e. the <code>expression 〈init〉</code>
+      is the variable reference <code>〈variable〉</code>) can be
+      abbreviated by <code>〈variable〉</code>.
+    </p>
+
+    <p>
       An unbound environment variable behaves as if was bound
       to <code>#f</code>.
     </p>
@@ -471,6 +478,41 @@
       is then executed on the environment.
     </p>
 
+    <h2>Relation to other SRFIs</h2>
+
+    <p>
+      In a Scheme system supporting both SRFI 165 and SRFI 166, the
+      implementation of SRFI 166 shall be compatible with the
+      implementation of SRFI 165.  This means, in particular, the
+      following:
+    </p>
+
+    <ul>
+      <li>
+	<p>SRFI 166 formatters are SRFI 165 computations.  In
+	  particular, they yield values (often an undefined one) to
+	  support functional programming.  SRFI
+	  166's <code>show</code> executes the computations in a SRFI
+	  166 specific environment.
+	</p>
+      </li>
+      <li>
+	<p>
+	  The bindings of the
+	  identifiers <code>fn</code>, <code>with</code>, <code>with!</code>,
+	  <code>each</code>, <code>each-in-list</code>, <code>forked</code>,
+	  and <code>make-state-variable</code> of SRFI 166 are the same
+	  as the bindings
+	  of <code>computation-fn</code>, <code>computation-with</code>,
+	  <code>computation-with!</code>,
+	  <code>computation-each</code>, <code>computation-each-in-list</code>,
+	  <code>computation-forked</code>,
+	  and <code>make-computation-environment-variable</code> of SRFI 165,
+	  respectively.
+	</p>
+      </li>
+    </ul>
+
     <h1>Implementation</h1>
 
     <p>The sample implementation is coded in portable R7RS scheme.  It
@@ -502,6 +544,11 @@ Polymorphism</i>, Advanced School of Functional Programming, 1995.
       name <em>standard construction</em>.  They are also known
       as <em>triples</em>.  The term <em>monad</em> is due to Saunders
       Mac Lane.
+    </p>
+
+    <p>
+      The author of this SRFI wants to thank Alex Shinn and John
+      Cowan for their valuable comments during its draft period.
     </p>
 
     <h1>Copyright</h1>
