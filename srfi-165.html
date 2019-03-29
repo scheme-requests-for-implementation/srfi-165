@@ -63,8 +63,9 @@
       </li>
       <li>
 	<p>
-	  This SRFI refers to SRFI 166, which has not been published
-	  yet.
+	  SRFI 165 and SRFI 166 shall be in line with each other,
+	  which may not be completely the case while they are still in
+	  draft status.
 	</p>
       </li>
     </ul>
@@ -463,7 +464,7 @@
     <h2>Environment variables</h2>
 
     <p><code>default-computation</code></p>
-
+    
     <p>This SRFI exports the
       identifier <code>default-computation</code>, which is bound to a
       location holding an environment variable (as if created
@@ -478,6 +479,58 @@
       is then executed on the environment.
     </p>
 
+    <h2>Extension for predefined environment variables</h2>
+
+    <p>
+      The complexity for accessing environment variables is
+      O(<var>n</var>) where <var>n</var> is the number of variables
+      bound in the environment.
+    </p>
+
+    <p>In use cases, where a few environment variables are accessed
+      often and which can be defined statically, the following syntax
+      can be used, which guarantees an accessing time of O(1) for
+      predefined environment variables.
+    <p>
+
+    <p><code>(define-computation-type 〈make-environment〉 〈run〉 〈variable〉 …)</code></p>
+
+    <p>This syntax may appear wherever other definitions may
+      appear. <code>〈make-environment〉</code>, <code>〈run〉</code>,
+      and each <code>〈variable〉</code> are identifiers.
+    </p>
+    
+    <p>
+      An instance of <code>define-computation-type</code> is equivalent
+      to the following definitions:
+    </p>
+
+    <ul>
+      <li>
+	<p><code>〈make-environment〉</code> is bound to a procedure that takes no
+	  arguments.  Invoking the procedure is equivalent to
+	  invoking <code>make-computation-environment</code> except for
+	  that the environment variables defined below can be used with
+	  the resulting environment.
+	</p>
+      </li>
+      <li>
+	<p><code>〈run〉</code> is bound to a procedure that takes one argument.
+	  Invoking the procedure is equivalent to
+	  invoking <code>computation-run</code> except for that the
+	  initial environment is created by invoking the procedure bound
+	  to <code>〈make-environment〉</code>.
+	</p>
+      </li>
+      <li>
+	<p>
+	  Each <code>〈variable〉</code> is bound to a environment variable, which can only
+	  be used with a environment created by invoking the procedure
+	  bound to <code>〈make-environment〉</code>.
+	</p>
+      </li>
+    </ul>
+    
     <h2>Relation to other SRFIs</h2>
 
     <p>

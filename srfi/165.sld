@@ -30,7 +30,8 @@
 	  computation-run computation-ask computation-local
 	  computation-fn computation-with computation-with!
 	  computation-forked computation-bind/forked
-	  default-computation)
+	  default-computation
+	  define-computation-type)
   (import (scheme base)
 	  (srfi 1)
 	  (srfi 111)

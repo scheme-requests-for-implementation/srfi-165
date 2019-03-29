@@ -28,6 +28,8 @@
 	  (srfi 165))
   (begin
     (define (run-tests)
+      (define-computation-type make-environment run z w)
+      
       (test-begin "SRFI 165")
 
       (test-assert (not (eqv? (make-computation-environment-variable)
@@ -35,21 +37,37 @@
 
       (test-assert (make-computation-environment))
 
+      (test-assert (make-environment))
+      
       (test-eqv #f
 	(let ((x (make-computation-environment-variable)))
 	  (computation-environment-ref (make-computation-environment) x)))
 
+      (test-eqv #f
+	(computation-environment-ref (make-environment) z))
+      
       (test-eqv 42
 	(let ((x (make-computation-environment-variable)))
 	  (computation-environment-ref
 	   (computation-environment-update (make-computation-environment) x 42)
 	   x)))
 
+      (test-eqv 42
+	(computation-environment-ref
+	 (computation-environment-update (make-environment) z 42)
+	 z))
+
       (test-eqv #f
 	(let ((x (make-computation-environment-variable))
 	      (y (make-computation-environment-variable)))
 	  (computation-environment-ref
 	   (computation-environment-update (make-computation-environment) x 42)
+	   y)))
+
+      (test-eqv #f
+	(let ((y (make-computation-environment-variable)))
+	  (computation-environment-ref
+	   (computation-environment-update (make-environment) z 42)
 	   y)))
 
       (test-eqv #f
@@ -65,18 +83,35 @@
 	  (computation-environment-ref env x)))
 
       (test-eqv 42
+	(let ((env (make-environment)))
+	  (computation-environment-update! env z 42)
+	  (computation-environment-ref env z)))
+
+      (test-eqv 42
 	(let ((x (make-computation-environment-variable))
 	      (env (make-computation-environment)))
 	  (computation-environment-update! env x 42)
 	  (computation-environment-update env x 10)
 	  (computation-environment-ref env x)))
 
+      (test-eqv 42
+	(let ((env (make-environment)))
+	  (computation-environment-update! env z 42)
+	  (computation-environment-update env z 10)
+	  (computation-environment-ref env z)))
+      
       (test-eqv #f
 	(let ((x (make-computation-environment-variable))
 	      (env (make-computation-environment)))
 	  (computation-environment-update!
 	   (computation-environment-update env x 10) x 42)
 	  (computation-environment-ref env x)))
+
+      (test-eqv #f
+	(let ((env (make-environment)))
+	  (computation-environment-update!
+	   (computation-environment-update env z 10) z 42)
+	  (computation-environment-ref env z)))
 
       (test-eqv 42
 	(let ((x (make-computation-environment-variable))
@@ -87,6 +122,12 @@
 	  (computation-environment-ref env x)))
 
       (test-eqv 42
+	(let ((env (make-environment)))
+	  (computation-environment-update!
+	   (computation-environment-update env w 10) z 42)
+	  (computation-environment-ref env z)))
+
+      (test-eqv 42
 	(let* ((x (make-computation-environment-variable))
 	       (env (computation-environment-update
 		     (make-computation-environment) x 42))
@@ -94,6 +135,13 @@
 	  (computation-environment-update! env x 10)
 	  (computation-environment-ref copy x)))
 
+      (test-eqv 42
+	(let* ((env (computation-environment-update
+		     (make-environment) z 42))
+	       (copy (computation-environment-copy env)))
+	  (computation-environment-update! env z 10)
+	  (computation-environment-ref copy z)))
+      
       (test-eqv #f
 	(let ((flag #f))
 	  (make-computation
@@ -177,6 +225,11 @@
 	  (computation-run (computation-with ((x 42))
 			     (computation-fn ((y x))
 			       (computation-pure y))))))
+
+      (test-eqv 42
+	(run (computation-with ((z 42))
+	       (computation-fn ((y z))
+		 (computation-pure y)))))
 
       (test-eqv 42
 	(let ((x (make-computation-environment-variable)))

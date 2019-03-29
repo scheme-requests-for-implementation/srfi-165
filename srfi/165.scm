@@ -21,10 +21,13 @@
 ;; SOFTWARE.
 
 (define make-computation-environment-variable
-  (let ((count -1))
+  (let ((count 0))
     (lambda ()
       (set! count (+ count 1))
-      count)))
+      (- count))))
+
+(define (predefined? var)
+  (not (negative? var)))
 
 (define variable-comparator
   (make-comparator integer? = < values))
@@ -32,44 +35,85 @@
 (define default-computation
   (make-computation-environment-variable))
 
-(define-record-type <computation-environment>
-  (%make-computation-environment global local)
-  computation-environment?
-  (global computation-environment-global)
-  (local computation-environment-local))
+(define (environment-global env)
+  (vector-ref env 0))
 
-(define (make-computation-environment)
-  (%make-computation-environment (hash-table variable-comparator)
-				 (mapping variable-comparator)))
+(define (environment-local env)
+  (vector-ref env 1))
+
+(define (environment-set-global! env global)
+  (vector-set! env 0 global))
+
+(define (environment-set-local! env local)
+  (vector-set! env 1 local))
+
+(define-syntax define-computation-type
+  (syntax-rules ()
+    ((define-computation-type make-environment run var ...)
+     (%define-computation-type make-environment run (var ...) 0 ()))))
+
+(define-syntax %define-computation-type
+  (syntax-rules ()
+    ((_ make-environment run () n ((var i) ...))
+     (begin
+       (define var i)
+       ...
+       (define (make-environment)
+	 (let ((env (make-vector (+ n 2))))
+	   (environment-set-global! env (hash-table variable-comparator))
+	   (environment-set-local! env (mapping variable-comparator))
+	   (vector-set! env (+ i 2) (box #f))
+	   ...
+	   env))
+       (define (run computation)
+	 (execute computation (make-environment)))))
+    ((_ make-environment run (v . v*) n (p ...))
+     (%define-computation-type make-environment run v* (+ n 1) (p ... (v n))))))
+
+(define-computation-type make-computation-environment computation-run)
 
 (define (computation-environment-ref env var)
-  (mapping-ref (computation-environment-local env)
-	       var
-	       (lambda ()
-		 (hash-table-ref/default (computation-environment-global env)
-					 var #f))
-	       unbox))
+  (if (predefined? var)
+      (unbox (vector-ref env (+ var 2)))
+      (mapping-ref (environment-local env)
+		   var
+		   (lambda ()
+		     (hash-table-ref/default (environment-global env)
+					     var #f))
+		   unbox)))
 
 (define (computation-environment-update env var val)
-  (%make-computation-environment (computation-environment-global env)
-				 (mapping-set
-				  (computation-environment-local env)
-				  var (box val))))
+  (let ((new-env (vector-copy env)))
+    (if (predefined? var)
+	(vector-set! new-env (+ var 2) (box val))
+	(environment-set-local! new-env
+				(mapping-set
+				 (environment-local env)
+				 var (box val))))
+    new-env))
 
 (define (computation-environment-update! env var val)
-  (mapping-ref (computation-environment-local env)
-	       var
-	       (lambda ()
-		 (hash-table-set! (computation-environment-global env) var val))
-	       (lambda (cell)
-		 (set-box! cell val))))
+  (if (predefined? var)
+      (set-box! (vector-ref env (+ var 2)) val)
+      (mapping-ref (environment-local env)
+		   var
+		   (lambda ()
+		     (hash-table-set! (environment-global env) var val))
+		   (lambda (cell)
+		     (set-box! cell val)))))
 
 (define (computation-environment-copy env)
-  (let ((global (hash-table-copy (computation-environment-global env) #t)))
+  (let ((global (hash-table-copy (environment-global env) #t)))
     (mapping-for-each (lambda (var cell)
 			(hash-table-set! global var (unbox cell)))
-		     (computation-environment-local env))
-    (%make-computation-environment global (mapping variable-comparator))))
+		      (environment-local env))
+    (let ((new-env (make-vector (vector-length env))))
+      (environment-set-global! new-env global)
+      (environment-set-local! new-env (mapping variable-comparator))
+      (do ((i (- (vector-length env) 1) (- i 1)))
+	  ((< i 2)
+	   new-env)
+	(vector-set! new-env i (box (unbox (vector-ref env i))))))))
 
 (define (execute computation env)
   (let ((coerce (if (procedure? computation)
@@ -81,9 +125,6 @@
 (define (make-computation proc)
   (lambda (env)
     (proc (lambda (c) (execute c env)))))
-
-(define (computation-run computation)
-  (execute computation (make-computation-environment)))
 
 (define (computation-pure . args)
   (make-computation
