@@ -82,15 +82,21 @@
 					     var #f))
 		   unbox)))
 
-(define (computation-environment-update env var val)
+(define (computation-environment-update env . arg*)
   (let ((new-env (vector-copy env)))
-    (if (predefined? var)
-	(vector-set! new-env (+ var 2) (box val))
-	(environment-set-local! new-env
-				(mapping-set
-				 (environment-local env)
-				 var (box val))))
-    new-env))
+    (let loop ((arg* arg*)
+	       (local (environment-local env)))
+      (if (null? arg*)
+	  (begin
+	    (environment-set-local! new-env local)
+	    new-env)
+	  (let ((var (car arg*))
+		(val (cadr arg*)))
+	    (if (predefined? var)
+		(begin
+		  (vector-set! new-env (+ var 2) (box val))
+		  (loop (cddr arg*) local))
+		(loop (cddr arg*) (mapping-set local var (box val)))))))))
 
 (define (computation-environment-update! env var val)
   (if (predefined? var)
@@ -189,15 +195,14 @@
 
 (define-syntax %with
   (syntax-rules ()
-    ((_ () ((var u val v) ...) ((a b) ...))
-     (let ((u var) ... (v val) ... (b a) ...)
+    ((_ () ((x u) ...) ((a b) ...))
+     (let ((u x) ... (b a) ...)
        (computation-local
 	   (lambda (env)
-	     (let* ((env (computation-environment-update env u v)) ...)
-	       env))
+	     (computation-environment-update env u ...) )
 	 (computation-each b ...))))
     ((_ ((var val) . rest) (p ...) () a* ...)
-     (%with rest (p ... (var u val v)) () a* ...))
+     (%with rest (p ... (var u) (val v)) () a* ...))
     ((_ () p* (q ...) a . a*)
      (%with () p* (q ... (a b)) . a*))))
 

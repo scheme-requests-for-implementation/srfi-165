@@ -52,6 +52,13 @@
 	   (computation-environment-update (make-computation-environment) x 42)
 	   x)))
 
+      (test-eqv 10
+	(let ((x (make-computation-environment-variable))
+	      (y (make-computation-environment-variable)))
+	  (computation-environment-ref
+	   (computation-environment-update (make-computation-environment) x 42 y 10)
+	   y)))
+
       (test-eqv 42
 	(computation-environment-ref
 	 (computation-environment-update (make-environment) z 42)
@@ -280,4 +287,16 @@
 			       (computation-fn ((x x))
 				 (computation-pure x)))))))
 
+      (test-equal (list 10 42)
+	(let ((x (make-computation-environment-variable))
+	      (y (make-computation-environment-variable)))
+	  (computation-run (computation-with ((x 10) (y 42))
+			     (computation-fn (x y)
+			       (computation-pure (list x y)))))))
+      
+      (test-equal (list 10 42)
+	(run (computation-with ((z 10) (w 42))
+	       (computation-fn (z w)
+		 (computation-pure (list z w))))))
+      
       (test-end))))

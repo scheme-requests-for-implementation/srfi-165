@@ -255,12 +255,16 @@
     environment <var>env</var>, returns that value,
     and <code>#f</code> otherwise.</p>
 
-    <p><code>(computation-environment-update <var>env</var> <var>var</var> <var>val</var>)</code></p>
-
-    <p>Returns a new environment that extends the
-      environment <var>env</var> by binding the
+    <p><code>(computation-environment-update <var>env</var> <var>arg</var>
+	…)</code></p>
+    
+    <p>
+      The arguments <var>arg</var> … alter between environment
+      variables <var>var</var> and values <var>val</var>.
+      Returns a new environment that extends the
+      environment <var>env</var> by binding each
       environment variable <var>var</var>
-      to <var>val</var>.
+      to the respective value <var>val</var>.
     </p>
 
     <p><code>(computation-environment-update! <var>env</var> <var>var</var> <var>val</var>)</code></p>
@@ -418,8 +422,8 @@
     </p>
 
     <p>
-      A <dfn>clause</dfn> of the form <code>(〈variable〉
-      〈variable〉)</code> (i.e. the <code>expression 〈init〉</code>
+      A <dfn>clause</dfn> of the form <code>(〈variable〉 〈variable〉)</code>
+      (i.e. the <code>expression 〈init〉</code>
       is the variable reference <code>〈variable〉</code>) can be
       abbreviated by <code>〈variable〉</code>.
     </p>
