@@ -20,7 +20,16 @@
 
     <h1>Status</h1>
 
-    <p>This SRFI is currently in <em>draft</em> status.  Here is <a href="https://srfi.schemers.org/srfi-process.html">an explanation</a> of each status that a SRFI can hold.  To provide input on this SRFI, please send email to <code><a href="mailto:srfi+minus+165+at+srfi+dotschemers+dot+org">srfi-165@<span class="antispam">nospam</span>srfi.schemers.org</a></code>.  To subscribe to the list, follow <a href="https://srfi.schemers.org/srfi-list-subscribe.html">these instructions</a>.  You can access previous messages via the mailing list <a href="https://srfi-email.schemers.org/srfi-165">archive</a>.</p>
+    <p>This SRFI is currently in <em>draft</em> status.  Here
+    is <a href="https://srfi.schemers.org/srfi-process.html">an
+    explanation</a> of each status that a SRFI can hold.  To provide
+    input on this SRFI, please send email
+    to <code><a href="mailto:srfi+minus+165+at+srfi+dotschemers+dot+org">srfi-165@<span class="antispam">nospam</span>srfi.schemers.org</a></code>.
+    To subscribe to the list,
+    follow <a href="https://srfi.schemers.org/srfi-list-subscribe.html">these
+    instructions</a>.  You can access previous messages via the
+    mailing
+    list <a href="https://srfi-email.schemers.org/srfi-165">archive</a>.</p>
     <ul>
       <li>Received: 2019/2/13</li>
       <li>60-day deadline: 2019/4/14</li>
@@ -54,28 +63,9 @@
       </li>
       <li>
 	<p>
-	  This SRFI defines an interface on which SRFIs like SRFI 159
-	  are supposed to be built.  There is a conceptual difference
-	  between SRFI 159 and this SRFI, though.  The environment
-	  variables of SRFI 159 are raw symbols, which makes them easy
-	  to use in simple cases, but they do not respect lexical
-	  scope and are entirely unhygienic.  The environment
-	  variables of this SRFI are like the parameters objects of
-	  SRFI 39, which are lexically scoped and can participate in
-	  the name-spacing provided by R7RS's library system and in
-	  Scheme's macro hygiene.  We therefore recommend that SRFI
-	  159 be amended so that is based on the infrastructure of
-	  this SRFI and does not use raw symbols.</p>
-
-	<p>
-	  The alternative would be to allow also raw symbols as
-	  environment variables in this SRFI (and to change the syntax
-	  of <code>fn</code>, <code>with</code> and <code>with!</code>
-	  accordingly).  While this has the advantage of being
-	  compatible with SRFI 159 as written, it has the drawback that
-	  it encourages the use of raw symbols to denote environment
-	  variables, leading to non-composable computations and to
-	  leaking of internal implementation details.
+	  SRFI 165 and SRFI 166 shall be in line with each other,
+	  which may not be completely the case while they are still in
+	  draft status.
 	</p>
       </li>
     </ul>
@@ -83,14 +73,33 @@
     <h1>Rationale</h1>
 
     <p>The environment monad is useful whenever code has to be
-      suspended and executed at a later time (even several times) and
+      suspended and executed at a later time (even several times), and
       whenever code depends (implicitly) on bindings of variables in a
       shared environment.
     </p>
 
     <p>
-      SRFI 159 is a major use case of the environment monad and a good
-      example of the concept in practice.
+      SRFI 166, a forthcoming revision of the combinator formatting
+      SRFI 159, is a major use case of the environment monad and a
+      good example of the concept in practice.  The formatters in SRFI
+      166 are computations in the nomenclature of this SRFI.  In
+      particular, the properties for computations apply to formatters
+      as well and the primitive and the derived procedures of this
+      SRFI can be used to construct sophisticated formatters of SRFI
+      166.
+    </p>
+
+    <p>
+      Nonetheless, SRFI 165 is an independent SRFI and not a proper
+      part of SRFI 166 for two reasons: Firstly, the SRFI 166's
+      combinator formatters are just one use case for the environment
+      monad of SRFI 165, so one wants to be able to use the procedures
+      and syntax specified in this SRFI independently of
+      formatting. Secondly, this SRFI exports more primitive and
+      derived procedures for the environment monad and computations
+      than are usually needed to write simple SRFI 166 formatters, so
+      including them all in SRFI 166 would shift away the focus
+      of SRFI 166 too much from its genuine purpose, formatting.
     </p>
 
     <h2>Monads</h2>
@@ -143,15 +152,16 @@
     </p>
 
     <p>
-      The simplest computation is <code>(return <var>val<sub>1</sub>
-	  …)</code>, which just yields the
-	  results <var>val<sub>1</sub></var> … when executed.
+      The simplest computation
+      is <code>(computation-pure <var>val<sub>1</sub> …)</code>,
+      which just yields the results <var>val<sub>1</sub></var> …
+      when executed.
     </p>
 
     <p>
       This SRFI provides a number of combinators that combine
       computations.  For
-      example <code>(sequence <var>computation<sub>1</sub></var>
+      example <code>(computation-each <var>computation<sub>1</sub></var>
       … <var>computation<sub>n</sub></var>)</code> is the computation
       formed by applying each <var>computation<sub>1</sub></var>,
       …, <var>computation<sub>n</sub></var> in sequence and eventually
@@ -161,16 +171,17 @@
     <p>
       Another combinator known from monads in functional programming
       is the computation
-      <code>(bind <var>computation</var> <var>proc</var>)</code>,
+      <code>(computation-bind <var>computation</var> <var>proc</var>)</code>,
       which is the computation formed by feeding the results yielded
       by <var>computation</var> to <var>proc</var> and yielding the
       results of the computation returned by the invocation
       of <var>proc</var>.
     </p>
 
-    <p>Computations are executed by <code>run</code>.  The
-      expression <code>(run <var>computation</var>)</code> returns the
-      values yielded by the execution of <var>computation</var>.
+    <p>Computations are executed by <code>computation-run</code>.  The
+      expression <code>(computation-run <var>computation</var>)</code>
+      returns the values yielded by the execution
+      of <var>computation</var>.
     </p>
 
     <p>The primary constructor for computations
@@ -195,8 +206,9 @@
     </p>
 
     <p>
-      Fresh environment variables are created by evaluating the
-      expression <code>(make-environment-variable)</code>.
+      Fresh environment variables are created by invoking the
+      procedure <code>make-computation-environment-variable</code>.
+      Each environment variable has a default value.
     </p>
 
     <p>Environments can be extended non-destructively to new
@@ -205,14 +217,15 @@
     </p>
 
     <p>
-      The <code>run</code> procedure creates a new empty environment
+      The <code>computation-run</code> procedure creates a new empty environment
       that is then threaded through the computation.
     </p>
 
     <p>
-      This SRFI provides the computation <code>(ask)</code>, which
-      yields the current environment.  Executing the
-      computation <code>(local <var>updater</var> <var>computation</var>)</code>
+      This SRFI provides the
+      computation <code>(computation-ask)</code>, which yields the
+      current environment.  Executing the
+      computation <code>(computation-local <var>updater</var> <var>computation</var>)</code>
       on an environment <var>env</var> means
       executing <var>computation</var> on the
       environment <code>(<var>updater</var> env)</code>.
@@ -222,45 +235,53 @@
 
     <h2>Environment procedures</h2>
 
-    <p><code>(make-environment-variable)</code></p>
+    <p><code>(make-computation-environment-variable <var>name</var> <var>default</var>
+	<var>immutable?</var>)</code></p>
 
     <p>Returns a Scheme object that can be used as an <dfn>environment
-      variable</dfn>.  The type of the returned object is unspecified.  Each
-      invocation returns an environment different to any previously
-      returned environment variable.
+      variable</dfn>, whose default value is <var>default</var> and
+      which is immutable if <var>immutable?</var> is
+      not <code>#f</code>.  The symbol or string <var>name</var> is
+      solely for debugging purposes.  The type of the returned object
+      is unspecified.  Each invocation returns an environment variable
+      different to any previously returned environment variable.
     </p>
 
-    <p><code>(make-environment)</code></p>
+    <p><code>(make-computation-environment)</code></p>
 
     <p>Returns a new <dfn>environment</dfn>, in which environment
       variables can be bound to values.  The type of the returned
       object is unspecified.
     </p>
 
-    <p><code>(environment-ref <var>env</var> <var>var</var>)</code></p>
+    <p><code>(computation-environment-ref <var>env</var> <var>var</var>)</code></p>
 
     <p>If the variable <var>var</var> is bound to a value in the
     environment <var>env</var>, returns that value,
-    and <code>#f</code> otherwise.</p>
+    and the environment variable's default value otherwise.</p>
 
-    <p><code>(environment-update <var>env</var> <var>var</var> <var>val</var>)</code></p>
-
-    <p>Returns a new environment that extends the
-      environment <var>env</var> by binding the
+    <p><code>(computation-environment-update <var>env</var> <var>arg</var>
+	…)</code></p>
+    
+    <p>
+      The arguments <var>arg</var> … alter between environment
+      variables <var>var</var> and values <var>val</var>.
+      Returns a new environment that extends the
+      environment <var>env</var> by binding each
       environment variable <var>var</var>
-      to <var>val</var>.
+      to the respective value <var>val</var>.
     </p>
 
-    <p><code>(environment-update! <var>env</var> <var>var</var> <var>val</var>)</code></p>
+    <p><code>(computation-environment-update! <var>env</var> <var>var</var> <var>val</var>)</code></p>
 
     <p>Updates the environment <var>env</var> in place by
       binding the environment variable <var>var</var>
       to <var>val</var>, and returns an unspecified value.
     </p>
 
-    <p><code>(environment-copy <var>env</var>)</code></p>
+    <p><code>(computation-environment-copy <var>env</var>)</code></p>
 
-    <p>Returns a new copy of the
+    <p>Returns a fresh copy of the
       environment <var>env</var>.
     </p>
 
@@ -286,21 +307,21 @@
       of the invocation of <var>proc</var>.
     </p>
 
-    <p><code>(run <var>computation</var>)</code></p>
+    <p><code>(computation-run <var>computation</var>)</code></p>
 
     <p>
       Executes the computation <var>computation</var> and returns the
       results it yields.
     </p>
 
-    <p><code>(ask)</code></p>
+    <p><code>(computation-ask)</code></p>
 
     <p>
       Returns a computation that, when executed on an environment,
       yields that environment.
     </p>
 
-    <p><code>(local <var>updater</var> <var>computation</var>)</code></p>
+    <p><code>(computation-local <var>updater</var> <var>computation</var>)</code></p>
 
     <p>
       Returns a computation that, when executed on an
@@ -313,14 +334,14 @@
 
     <h2>Derived monadic procedures</h2>
 
-    <p><code>(return <var>obj<sub>1</sub></var> …)</code></p>
+    <p><code>(computation-pure <var>obj<sub>1</sub></var> …)</code></p>
 
     <p>
       Returns a computation that, when executed, yields the
       values <var>obj<sub>1</sub></var> ….
     </p>
 
-    <p><code>(sequence <var>computation<sub>1</sub></var>
+    <p><code>(computation-each <var>computation<sub>1</sub></var>
 	… <var>computation<sub>n</sub></var>)</code></p>
 
     <p>
@@ -330,26 +351,47 @@
       yielded by the last computation.
     </p>
 
-    <p><code>(bind <var>computation</var> <var>proc<sub>1</sub></var> …)</code></p>
+    <p><code>(computation-each-in-list <var>list</var>)</code></p>
 
     <p>
-      <code>(bind <var>computation</var>)</code> is equivalent
-      to <var>computation</var>.  <code>(bind <var>computation</var>
+      Equivalent to <code>(computation-each <var>computation<sub>1</sub></var>
+	… <var>computation<sub>n</sub></var>)</code>
+	if <var>list</var> is a list whose elements
+	are <var>computation<sub>1</sub></var>,
+	…, <var>computation<sub>n</sub></var>.
+    </p>
+
+    <p><code>(computation-bind <var>computation</var> <var>proc<sub>1</sub></var> …)</code></p>
+
+    <p>
+      <code>(computation-bind <var>computation</var>)</code> is equivalent
+      to <var>computation</var>.  <code>(computation-bind <var>computation</var>
 	<var>proc<sub>1</sub></var> <var>proc<sub>2</sub></var>
-	…)</code> is equivalent to <code>(bind
-	(bind <var>computation</var> <var>proc<sub>1</sub></var>)
+	…)</code> is equivalent to <code>(computation-bind
+	(computation-bind <var>computation</var> <var>proc<sub>1</sub></var>)
 	<var>proc<sub>2</sub></var> …)</code>.
     </p>
 
     <p>
-      The invocation of <code>(bind <var>computation</var> <var>proc</var>)</code>
+      The invocation of <code>(computation-bind <var>computation</var> <var>proc</var>)</code>
       returns a computation that, when executed, executes the
       computation <var>computation</var>, on which results the
       procedure <var>proc</var> is then invoked and that has to return
       a computation, which is then executed and which results are yielded.
     </p>
 
-    <p><code>(forked <var>computation<sub>1</sub></var>
+    <p>
+      <code>(computation-sequence <var>list</var>)</code>
+    </p>
+
+    <p>
+      When invoked on a list <var>list</var> of computations, returns
+      a computation that, when executed, executes the computations in
+      sequence and yields a list whose elements are the results
+      yielded by the computations.
+    </p>
+
+    <p><code>(computation-forked <var>computation<sub>1</sub></var>
 	… <var>computation<sub>n</sub></var>)</code></p>
 
     <p>
@@ -361,9 +403,17 @@
       environment and yields its results.
     </p>
 
+    <p><code>(computation-bind/forked <var>computation</var> <var>proc<sub>1</sub></var> …)</code></p>
+
+    <p>
+      As <code>(computation-bind <var>computation</var> <var>proc<sub>1</sub></var>
+      …)</code>, but executes <var>computation</var> on a fresh copy
+      of the environment.
+    </p>
+
     <h2>Derived syntax</h2>
 
-    <p><code>(fn ((〈variable<sub>1</sub>〉 〈init<sub>1</sub>〉) …) 〈body〉)</code></p>
+    <p><code>(computation-fn ((〈variable<sub>1</sub>〉 〈init<sub>1</sub>〉) …) 〈body〉)</code></p>
 
     <p>
       Evaluates the expressions 〈init<sub>1</sub>〉 … to environment
@@ -377,11 +427,18 @@
     </p>
 
     <p>
-      An unbound environment variable behaves as if was bound
-      to <code>#f</code>.
+      A <dfn>clause</dfn> of the form <code>(〈variable〉 〈variable〉)</code>
+      (i.e. the <code>expression 〈init〉</code>
+      is the variable reference <code>〈variable〉</code>) can be
+      abbreviated by <code>〈variable〉</code>.
     </p>
 
-    <p><code>(with ((〈variable<sub>1</sub>〉 〈init<sub>1</sub>〉) …) 〈expr<sub>1</sub>〉 …
+    <p>
+      An unbound environment variable behaves as if was bound
+      to its default value.
+    </p>
+
+    <p><code>(computation-with ((〈variable<sub>1</sub>〉 〈init<sub>1</sub>〉) …) 〈expr<sub>1</sub>〉 …
 	〈expr<sub>n</sub>〉)</code></p>
     <p>
       Evaluates the expressions 〈expr<sub>1</sub>〉 …
@@ -400,10 +457,10 @@
       environment, and then yields the results of the last computation.
     </p>
 
-    <p><code>(with! (〈variable<sub>1</sub>〉 〈init<sub>1</sub>〉) …)</code></p>
+    <p><code>(computation-with! (〈variable<sub>1</sub>〉 〈init<sub>1</sub>〉) …)</code></p>
 
     <p>
-      Evaluates the expressions 〈variable<sub>1</sub>〉 … to
+      Evaluates the expressions 〈variable<sub>1</sub>〉 … to mutable
       environment variables <var>var<sub>1</sub></var> … and the
       expressions 〈init<sub>1</sub>〉 … to
       values <var>val<sub>1</sub></var> … in an unspecified order, and
@@ -416,22 +473,121 @@
     <h2>Environment variables</h2>
 
     <p><code>default-computation</code></p>
-
-    <p>This SRFI predefines one environment
-      variable, <code>default-computation</code>, which is initially
-      unbound.  Whenever an object <var>computation</var> is to be
+    
+    <p>This SRFI exports the
+      identifier <code>default-computation</code>, which is bound to a
+      location holding a mutable environment variable (as if created
+      by <code>(make-computation-environment-variable)</code>) in the
+      sense of this SRFI.  In each fresh computation
+      environment, <code>default-computation</code> is initially
+      unbound.  Whenever a computation <var>computation</var> is to be
       executed on an environment and is neither a computation nor a
       procedure, the value to which <code>default-computation</code>
       is bound in the environment has to be a procedure, which is then
-      invoked on <var>computation</var> to return a
-      computation, which is then executed on the environment.
+      invoked on <var>computation</var> to return a computation, which
+      is then executed on the environment.
+    </p>
+
+    <h2>Extension for predefined environment variables</h2>
+
+    <p>
+      The complexity for accessing environment variables is
+      O(<var>n</var>) where <var>n</var> is the number of variables
+      bound in the environment.
+    </p>
+
+    <p>In use cases, where a few environment variables are accessed
+      often and which can be defined statically, the following syntax
+      can be used, which guarantees an accessing time of O(1) for
+      predefined environment variables.
+    <p>
+
+    <p><code>(define-computation-type 〈make-environment〉 〈run〉 〈clause〉 …)</code></p>
+
+    <p>This syntax may appear wherever other definitions may
+      appear. Each <code>〈clause〉</code> is of the form <code>(〈variable〉 〈default〉)</code>,
+      <code>(〈variable〉 〈default〉 "immutable")</code>,
+      or <code>〈variable〉</code>.  The latter form is equivalent
+      to <code>(〈variable〉 #f)</code>.
+      <code>〈make-environment〉</code>, <code>〈run〉</code>,
+      and each <code>〈variable〉</code> are identifiers.
     </p>
     
+    <p>
+      An instance of <code>define-computation-type</code> is equivalent
+      to the following definitions:
+    </p>
+
+    <ul>
+      <li>
+	<p><code>〈make-environment〉</code> is bound to a procedure that takes no
+	  arguments.  Invoking the procedure is equivalent to
+	  invoking <code>make-computation-environment</code> except for
+	  that the environment variables defined below can be used with
+	  the resulting environment.
+	</p>
+      </li>
+      <li>
+	<p><code>〈run〉</code> is bound to a procedure that takes one argument.
+	  Invoking the procedure is equivalent to
+	  invoking <code>computation-run</code> except for that the
+	  initial environment is created by invoking the procedure bound
+	  to <code>〈make-environment〉</code>.
+	</p>
+      </li>
+      <li>
+	<p>
+	  Each <code>〈variable〉</code> is bound to a environment
+	  variable, which can only be used with a environment created
+	  by invoking the procedure bound
+	  to <code>〈make-environment〉</code>.  Its default value is
+	  the result of evaluating <code>〈default〉</code>.  The
+	  environment variable is immutable if the <code>(〈variable〉
+	  〈default〉 "immutable")</code> form is used.
+	</p>
+      </li>
+    </ul>
+    
+    <h2>Relation to other SRFIs</h2>
+
+    <p>
+      In a Scheme system supporting both SRFI 165 and SRFI 166, the
+      implementation of SRFI 166 shall be compatible with the
+      implementation of SRFI 165.  This means, in particular, the
+      following:
+    </p>
+
+    <ul>
+      <li>
+	<p>SRFI 166 formatters are SRFI 165 computations.  In
+	  particular, they yield values (often an undefined one) to
+	  support functional programming.  SRFI
+	  166's <code>show</code> executes the computations in a SRFI
+	  166 specific environment.
+	</p>
+      </li>
+      <li>
+	<p>
+	  The bindings of the
+	  identifiers <code>fn</code>, <code>with</code>, <code>with!</code>,
+	  <code>each</code>, <code>each-in-list</code>, <code>forked</code>,
+	  and <code>make-state-variable</code> of SRFI 166 are the same
+	  as the bindings
+	  of <code>computation-fn</code>, <code>computation-with</code>,
+	  <code>computation-with!</code>,
+	  <code>computation-each</code>, <code>computation-each-in-list</code>,
+	  <code>computation-forked</code>,
+	  and <code>make-computation-environment-variable</code> of SRFI 165,
+	  respectively.
+	</p>
+      </li>
+    </ul>
+
     <h1>Implementation</h1>
 
     <p>The sample implementation is coded in portable R7RS scheme.  It
-      makes use of the (portable) SRFI 111, SRFI 125, SRFI 128, and
-      SRFI 146.  The testing code also uses SRFI 64.
+      makes use of the (portable) SRFI 1, SRFI 111, SRFI 125, SRFI
+      128, and SRFI 146.  The testing code also uses SRFI 64.
     </p>
 
     <p>
@@ -458,6 +614,11 @@ Polymorphism</i>, Advanced School of Functional Programming, 1995.
       name <em>standard construction</em>.  They are also known
       as <em>triples</em>.  The term <em>monad</em> is due to Saunders
       Mac Lane.
+    </p>
+
+    <p>
+      The author of this SRFI wants to thank Alex Shinn and John
+      Cowan for their valuable comments during its draft period.
     </p>
 
     <h1>Copyright</h1>
