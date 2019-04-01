@@ -206,8 +206,9 @@
     </p>
 
     <p>
-      Fresh environment variables are created by evaluating the
-      expression <code>(make-computation-environment-variable)</code>.
+      Fresh environment variables are created by invoking the
+      procedure <code>make-computation-environment-variable</code>.
+      Each environment variable has a default value.
     </p>
 
     <p>Environments can be extended non-destructively to new
@@ -234,12 +235,16 @@
 
     <h2>Environment procedures</h2>
 
-    <p><code>(make-computation-environment-variable)</code></p>
+    <p><code>(make-computation-environment-variable <var>name</var> <var>default</var>
+	<var>immutable?</var>)</code></p>
 
     <p>Returns a Scheme object that can be used as an <dfn>environment
-      variable</dfn>.  The type of the returned object is unspecified.  Each
-      invocation returns an environment different to any previously
-      returned environment variable.
+      variable</dfn>, whose default value is <var>default</var> and
+      which is immutable if <var>immutable?</var> is
+      not <code>#f</code>.  The symbol or string <var>name</var> is
+      solely for debugging purposes.  The type of the returned object
+      is unspecified.  Each invocation returns an environment variable
+      different to any previously returned environment variable.
     </p>
 
     <p><code>(make-computation-environment)</code></p>
@@ -253,7 +258,7 @@
 
     <p>If the variable <var>var</var> is bound to a value in the
     environment <var>env</var>, returns that value,
-    and <code>#f</code> otherwise.</p>
+    and the environment variable's default value otherwise.</p>
 
     <p><code>(computation-environment-update <var>env</var> <var>arg</var>
 	…)</code></p>
@@ -430,7 +435,7 @@
 
     <p>
       An unbound environment variable behaves as if was bound
-      to <code>#f</code>.
+      to its default value.
     </p>
 
     <p><code>(computation-with ((〈variable<sub>1</sub>〉 〈init<sub>1</sub>〉) …) 〈expr<sub>1</sub>〉 …
@@ -455,7 +460,7 @@
     <p><code>(computation-with! (〈variable<sub>1</sub>〉 〈init<sub>1</sub>〉) …)</code></p>
 
     <p>
-      Evaluates the expressions 〈variable<sub>1</sub>〉 … to
+      Evaluates the expressions 〈variable<sub>1</sub>〉 … to mutable
       environment variables <var>var<sub>1</sub></var> … and the
       expressions 〈init<sub>1</sub>〉 … to
       values <var>val<sub>1</sub></var> … in an unspecified order, and
@@ -471,7 +476,7 @@
     
     <p>This SRFI exports the
       identifier <code>default-computation</code>, which is bound to a
-      location holding an environment variable (as if created
+      location holding a mutable environment variable (as if created
       by <code>(make-computation-environment-variable)</code>) in the
       sense of this SRFI.  In each fresh computation
       environment, <code>default-computation</code> is initially
@@ -497,10 +502,14 @@
       predefined environment variables.
     <p>
 
-    <p><code>(define-computation-type 〈make-environment〉 〈run〉 〈variable〉 …)</code></p>
+    <p><code>(define-computation-type 〈make-environment〉 〈run〉 〈clause〉 …)</code></p>
 
     <p>This syntax may appear wherever other definitions may
-      appear. <code>〈make-environment〉</code>, <code>〈run〉</code>,
+      appear. Each <code>〈clause〉</code> is of the form <code>(〈variable〉 〈default〉)</code>,
+      <code>(〈variable〉 〈default〉 "immutable")</code>,
+      or <code>〈variable〉</code>.  The latter form is equivalent
+      to <code>(〈variable〉 #f)</code>.
+      <code>〈make-environment〉</code>, <code>〈run〉</code>,
       and each <code>〈variable〉</code> are identifiers.
     </p>
     
@@ -528,9 +537,13 @@
       </li>
       <li>
 	<p>
-	  Each <code>〈variable〉</code> is bound to a environment variable, which can only
-	  be used with a environment created by invoking the procedure
-	  bound to <code>〈make-environment〉</code>.
+	  Each <code>〈variable〉</code> is bound to a environment
+	  variable, which can only be used with a environment created
+	  by invoking the procedure bound
+	  to <code>〈make-environment〉</code>.  Its default value is
+	  the result of evaluating <code>〈default〉</code>.  The
+	  environment variable is immutable if the <code>(〈variable〉
+	  〈default〉 "immutable")</code> form is used.
 	</p>
       </li>
     </ul>

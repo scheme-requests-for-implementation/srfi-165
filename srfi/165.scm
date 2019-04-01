@@ -20,20 +20,34 @@
 ;; CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 ;; SOFTWARE.
 
+(define-record-type <computation-environment-variable>
+  (make-environment-variable name default immutable? id)
+  environment-variable?
+  (name environment-variable-name)
+  (default environment-variable-default)
+  (immutable? environment-variable-immutable?)
+  (id environment-variable-id))
+
 (define make-computation-environment-variable
   (let ((count 0))
-    (lambda ()
+    (lambda (name default immutable?)
       (set! count (+ count 1))
-      (- count))))
+      (make-environment-variable name default immutable? (- count)))))
 
 (define (predefined? var)
-  (not (negative? var)))
+  (not (negative? (environment-variable-id var))))
 
 (define variable-comparator
-  (make-comparator integer? = < values))
+  (make-comparator environment-variable?
+		   eq?
+		   (lambda (x y)
+		     (< (environment-variable-id x)
+			(environment-variable-id y)))
+		   (lambda (x . y)
+		     (environment-variable-id x))))
 
 (define default-computation
-  (make-computation-environment-variable))
+  (make-computation-environment-variable 'default-computation #f #f))
 
 (define (environment-global env)
   (vector-ref env 0))
@@ -47,6 +61,12 @@
 (define (environment-set-local! env local)
   (vector-set! env 1 local))
 
+(define (environment-cell-set! env var box)
+  (vector-set! env (+ 2 (environment-variable-id var)) box))
+
+(define (environment-cell env var)
+  (vector-ref env (+ 2 (environment-variable-id var))))
+
 (define-syntax define-computation-type
   (syntax-rules ()
     ((define-computation-type make-environment run var ...)
@@ -54,32 +74,38 @@
 
 (define-syntax %define-computation-type
   (syntax-rules ()
-    ((_ make-environment run () n ((var i) ...))
+    ((_ make-environment run () n ((var default e immutable i) ...))
      (begin
-       (define var i)
+       (define-values (e ...) (values default ...))
+       (define var (make-environment-variable 'var e immutable i))
        ...
        (define (make-environment)
 	 (let ((env (make-vector (+ n 2))))
 	   (environment-set-global! env (hash-table variable-comparator))
 	   (environment-set-local! env (mapping variable-comparator))
-	   (vector-set! env (+ i 2) (box #f))
+	   (vector-set! env (+ i 2) (box e))
 	   ...
 	   env))
        (define (run computation)
 	 (execute computation (make-environment)))))
+    ((_ make-environment run ((v d) . v*) n (p ...))
+     (%define-computation-type make-environment run v* (+ n 1) (p ... (v d e #f n))))
+    ((_ make-environment run ((v d "immutable") . v*) n (p ...))
+     (%define-computation-type make-environment run v* (+ n 1) (p ... (v d e #t n))))
     ((_ make-environment run (v . v*) n (p ...))
-     (%define-computation-type make-environment run v* (+ n 1) (p ... (v n))))))
+     (%define-computation-type make-environment run v* (+ n 1) (p ... (v #f e #f n))))))
 
 (define-computation-type make-computation-environment computation-run)
 
 (define (computation-environment-ref env var)
   (if (predefined? var)
-      (unbox (vector-ref env (+ var 2)))
+      (unbox (environment-cell env var))
       (mapping-ref (environment-local env)
 		   var
 		   (lambda ()
 		     (hash-table-ref/default (environment-global env)
-					     var #f))
+					     var
+					     (environment-variable-default var)))
 		   unbox)))
 
 (define (computation-environment-update env . arg*)
@@ -94,13 +120,13 @@
 		(val (cadr arg*)))
 	    (if (predefined? var)
 		(begin
-		  (vector-set! new-env (+ var 2) (box val))
+		  (environment-cell-set! new-env var (box val))
 		  (loop (cddr arg*) local))
 		(loop (cddr arg*) (mapping-set local var (box val)))))))))
 
 (define (computation-environment-update! env var val)
   (if (predefined? var)
-      (set-box! (vector-ref env (+ var 2)) val)
+      (set-box! (environment-cell env var) val)
       (mapping-ref (environment-local env)
 		   var
 		   (lambda ()
