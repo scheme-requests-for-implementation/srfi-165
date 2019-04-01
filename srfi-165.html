@@ -496,7 +496,7 @@
       bound in the environment.
     </p>
 
-    <p>In use cases, where a few environment variables are accessed
+    <p>In use cases where a few environment variables are accessed
       often and which can be defined statically, the following syntax
       can be used, which guarantees an accessing time of O(1) for
       predefined environment variables.
@@ -522,7 +522,7 @@
       <li>
 	<p><code>〈make-environment〉</code> is bound to a procedure that takes no
 	  arguments.  Invoking the procedure is equivalent to
-	  invoking <code>make-computation-environment</code> except for
+	  invoking <code>make-computation-environment</code> except
 	  that the environment variables defined below can be used with
 	  the resulting environment.
 	</p>
@@ -537,8 +537,8 @@
       </li>
       <li>
 	<p>
-	  Each <code>〈variable〉</code> is bound to a environment
-	  variable, which can only be used with a environment created
+	  Each <code>〈variable〉</code> is bound to an environment
+	  variable, which can only be used with an environment created
 	  by invoking the procedure bound
 	  to <code>〈make-environment〉</code>.  Its default value is
 	  the result of evaluating <code>〈default〉</code>.  The
