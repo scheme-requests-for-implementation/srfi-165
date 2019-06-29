@@ -56,12 +56,6 @@
 	  which expressions are in tail position.
 	</p>
       </li>
-      <li>
-	<p>
-	  We should specify the interaction of the various primitives
-	  below with non-local control flow.
-	</p>
-      </li>
     </ul>
 
     <h1>Rationale</h1>
@@ -541,6 +535,16 @@
 	</p>
       </li>
     </ul>
+
+    <h2>Non-local control flow</h2>
+
+    <p>The (higher order) procedures described in this SRFI are fully
+      compatible with non-local control flow, in particular, with
+      first-class continuations.</p>
+
+    <p>For example, it is well-defined if the argument <var>proc</var>
+      of <code>make-computation</code> returns multiple times.
+    </p>
     
     <h2>Relation to other SRFIs</h2>
 
