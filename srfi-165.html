@@ -46,31 +46,6 @@
     extended environment, and modify the environment for future
     computations.
 
-    <h1>Issues</h1>
-
-    <ul>
-      <li>
-	<p>
-	  We should specify which procedures are guaranteed to be
-	  called in tail position by the various primitives below and
-	  which expressions are in tail position.
-	</p>
-      </li>
-      <li>
-	<p>
-	  We should specify the interaction of the various primitives
-	  below with non-local control flow.
-	</p>
-      </li>
-      <li>
-	<p>
-	  SRFI 165 and SRFI 166 shall be in line with each other,
-	  which may not be completely the case while they are still in
-	  draft status.
-	</p>
-      </li>
-    </ul>
-
     <h1>Rationale</h1>
 
     <p>The environment monad is useful whenever code has to be
@@ -422,8 +397,8 @@
       returns a computation that, when executed, lexically binds the
       variables 〈variable<sub>1</sub>〉 … to the values to which the
       environment variables <var>var<sub>1</sub></var>, … are bound,
-      and evaluates the body 〈body〉 in the resulting lexical environment.
-      The value of the last expression in 〈body〉 has to be a computation,
+      and evaluates the body <code>〈body〉</code> in the resulting lexical environment.
+      The value of the last expression in <code>〈body〉</code> has to be a computation,
       which is then executed and its results are yielded.
     </p>
 
@@ -548,6 +523,88 @@
 	</p>
       </li>
     </ul>
+
+    <h2>Non-local control flow</h2>
+
+    <p>The (higher order) procedures described in this SRFI are fully
+      compatible with non-local control flow, in particular, with
+      first-class continuations.</p>
+
+    <p>For example, the behavior is well-defined if the
+      argument <var>proc</var> of <code>make-computation</code>
+      returns multiple times.
+    </p>
+
+    <h2>Proper tail recursion</h2>
+
+    <p>Computations can be executed in <dfn>tail context</dfn>.  A
+    tail context is always determined with respect to a particular
+    call to <code>computation-run</code>.</p>
+
+    <p>The following rules apply inductively:</p>
+
+    <ul>
+      <li>
+	<p>
+	  If <code>computation-run</code> is invoked, its
+	  argument <var>computation</var> is executed in tail context
+	  with respect to that call.
+	</p>
+      </li>
+      <li>
+	<p>
+	  If the computation returned by <code>make-computation</code>
+	  is executed in tail context, the argument <var>proc</var> is
+	  tail-called with respect to the call
+	  to <code>computation-run</code>.
+	</p>
+      </li>
+      <li>
+	<p>
+	  If the computation returned by <code>computation-local</code>
+	  is executed in tail context, its argument <var>computation</var> 
+	  is executed in tail context.
+	</p>
+      </li>
+      <li>
+	<p>
+	  If the computation returned by <code>computation-each</code>
+	  is executed in tail context, its
+	  argument <var>computation<sub>n></sub></var>
+	  is executed in tail context.
+	</p>
+      </li>
+      <li>
+	<p>
+	  If the computation returned by <code>computation-bind</code>
+	  is executed in tail context, the computation returned by its
+	  argument <var>proc</var> is executed in tail context.
+	</p>
+      </li>
+      <li>
+	<p>
+	  If the computation returned by <code>computation-forked</code>
+	  is executed in tail context, its
+	  argument <var>computation<sub>n</sub></var> is executed in
+	  tail context.
+	</p>
+      </li>
+      <li>
+	<p>
+	  If the computation returned by <code>computation-fn</code> is
+	  exectuted in tail context, the last expression
+	  in <code>〈body〉</code> is executed in tail context.
+	</p>
+      </li>
+      <li>
+	<p>
+	  If the computation returned by <code>computation-with</code>
+	  is executed in tail
+	  context, <var>computation<sub>n</sub></var> is executed in
+	  tail context.
+	</p>
+      </li>      
+    </ul>
     
     <h2>Relation to other SRFIs</h2>
 
@@ -583,6 +640,8 @@
 	</p>
       </li>
     </ul>
+
+    <p>Further details can be found in the upcoming SRFI 166.</p>
 
     <h1>Implementation</h1>
 
