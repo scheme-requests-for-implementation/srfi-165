@@ -30,16 +30,16 @@
   (begin
     (define (run-tests)
       (define-computation-type make-environment run z w)
-      
+
       (test-begin "SRFI 165")
 
       (test-assert (not (eqv? (make-computation-environment-variable 'x #f #f)
 			      (make-computation-environment-variable 'x #f #f))))
-      
+
       (test-assert (make-computation-environment))
 
       (test-assert (make-environment))
-      
+
       (test-eqv #f
 	(let ((x (make-computation-environment-variable 'x #f #f)))
 	  (computation-environment-ref (make-computation-environment) x)))
@@ -50,7 +50,7 @@
 
       (test-eqv #f
 	(computation-environment-ref (make-environment) z))
-      
+
       (test-eqv 42
 	(let ((x (make-computation-environment-variable 'x #f #f)))
 	  (computation-environment-ref
@@ -111,7 +111,7 @@
 	  (computation-environment-update! env z 42)
 	  (computation-environment-update env z 10)
 	  (computation-environment-ref env z)))
-      
+
       (test-eqv #f
 	(let ((x (make-computation-environment-variable 'x #f #f))
 	      (env (make-computation-environment)))
@@ -153,7 +153,7 @@
 	       (copy (computation-environment-copy env)))
 	  (computation-environment-update! env z 10)
 	  (computation-environment-ref copy z)))
-      
+
       (test-eqv #f
 	(let ((flag #f))
 	  (make-computation
@@ -298,7 +298,7 @@
 	  (computation-run (computation-with ((x 10) (y 42))
 			     (computation-fn (x y)
 			       (computation-pure (list x y)))))))
-      
+
       (test-equal (list 10 42)
 	(run (computation-with ((z 10) (w 42))
 	       (computation-fn (z w)
@@ -309,5 +309,5 @@
 	  (define-computation-type make-environment run (x 10) (y 42 "immutable"))
 	  (run (computation-fn (x y)
 		 (computation-pure (list x y))))))
-      
+
       (test-end))))
