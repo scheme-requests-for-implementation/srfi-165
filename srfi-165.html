@@ -68,7 +68,7 @@
 
     <p>
       Nonetheless, SRFI 165 is an independent SRFI and not a proper
-      part of SRFI 166 for two reasons: Firstly, the SRFI 166's
+      part of SRFI 166 for two reasons: Firstly, SRFI 166's
       combinator formatters are just one use case for the environment
       monad of SRFI 165, so one wants to be able to use the procedures
       and syntax specified in this SRFI independently of
@@ -170,8 +170,8 @@
     <p>
       returns a computation that, when executed, first
       computes <code>a</code>.  If that computation yields a true
-      value, <code>42</code> is yielded, otherwise the result that is
-      yielded by computing <code>b</code>.
+      value, <code>42</code> is yielded, otherwise the result of
+      computing <code>b</code> is yielded.
     </p>
 
     <h2>Environments</h2>
@@ -241,7 +241,7 @@
 	…)</code></p>
     
     <p>
-      The arguments <var>arg</var> … alter between environment
+      The arguments <var>arg</var> … alternate between environment
       variables <var>var</var> and values <var>val</var>.
       Returns a new environment that extends the
       environment <var>env</var> by binding each
@@ -353,8 +353,8 @@
       The invocation of <code>(computation-bind <var>computation</var> <var>proc</var>)</code>
       returns a computation that, when executed, executes the
       computation <var>computation</var>, on which results the
-      procedure <var>proc</var> is then invoked and that has to return
-      a computation, which is then executed and which results are yielded.
+      procedure <var>proc</var> is then invoked, resulting in
+      a computation that is then executed and whose results are yielded.
     </p>
 
     <p>
@@ -374,7 +374,7 @@
     <p>
       Returns a computation that, when executed on an environment,
       executes each of the
-      computation <var>computation<sub>1</sub></var>, … on fresh
+      computations <var>computation<sub>1</sub></var>, … on fresh
       copies of the environment, and finally
       executes <var>computation<sub>n</sub></var> on the original
       environment and yields its results.
@@ -400,7 +400,7 @@
       environment variables <var>var<sub>1</sub></var>, … are bound,
       and evaluates the body <code>〈body〉</code> in the resulting lexical environment.
       The value of the last expression in <code>〈body〉</code> has to be a computation,
-      which is then executed and its results are yielded.
+      which is then executed and its results yielded.
     </p>
 
     <p>
@@ -411,7 +411,7 @@
     </p>
 
     <p>
-      An unbound environment variable behaves as if was bound
+      An unbound environment variable behaves as if it were bound
       to its default value.
     </p>
 
@@ -474,8 +474,8 @@
     </p>
 
     <p>In use cases where a few environment variables are accessed
-      often and which can be defined statically, the following syntax
-      can be used, which guarantees an accessing time of O(1) for
+      often and can be defined statically, the following syntax
+      can be used, which guarantees an access time of O(1) for
       predefined environment variables.
     <p>
 
@@ -528,7 +528,7 @@
     <h2>Non-local control flow</h2>
 
     <p>The (higher order) procedures described in this SRFI are fully
-      compatible with non-local control flow, in particular, with
+      compatible with non-local control flow, in particular with
       first-class continuations.</p>
 
     <p>For example, the behavior is well-defined if the
@@ -593,7 +593,7 @@
       <li>
 	<p>
 	  If the computation returned by <code>computation-fn</code> is
-	  exectuted in tail context, the last expression
+	  executed in tail context, the last expression
 	  in <code>〈body〉</code> is executed in tail context.
 	</p>
       </li>
@@ -610,7 +610,7 @@
     <h2>Relation to other SRFIs</h2>
 
     <p>
-      In a Scheme system supporting both SRFI 165 and SRFI 166, the
+      In a Scheme system that supports both SRFI 165 and SRFI 166, the
       implementation of SRFI 166 shall be compatible with the
       implementation of SRFI 165.  This means, in particular, the
       following:
@@ -622,7 +622,7 @@
 	  particular, they yield values (often an undefined one) to
 	  support functional programming.  SRFI
 	  166's <code>show</code> executes the computations in a SRFI
-	  166 specific environment.
+	  166-specific environment.
 	</p>
       </li>
       <li>
