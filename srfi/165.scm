@@ -82,7 +82,7 @@
        ...
        (define (make-environment)
 	 (let ((env (make-vector (+ n 2))))
-	   (environment-set-global! env (hash-table variable-comparator))
+	   (environment-set-global! env (make-hash-table variable-comparator))
 	   (environment-set-local! env (mapping variable-comparator))
 	   (vector-set! env (+ i 2) (box e))
 	   ...
