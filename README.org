@@ -1,3 +1,6 @@
+
+# SPDX-FileCopyrightText: 2026 Arthur A. Gleckler
+# SPDX-License-Identifier: MIT
 * SRFI 165: The Environment Monad
 
 ** by Marc Nieper-Wißkirchen
@@ -9,14 +12,11 @@ keywords: [[https://srfi.schemers.org/?keywords=miscellaneous][Miscellaneous]]
 This repository hosts [[https://srfi.schemers.org/srfi-165/][SRFI 165]]: The Environment Monad, a [[https://srfi.schemers.org/][Scheme Request for Implementation]].
 
 This SRFI is in /final/ status.
-
-See also [[https://srfi.schemers.org/srfi-159/][SRFI 159: Combinator Formatting]] and [[https://srfi.schemers.org/srfi-166/][SRFI 166: Monadic Formatting]].
-
+See also [[/srfi-159/][SRFI 159: Combinator Formatting]] and [[/srfi-166/][SRFI 166: Monadic Formatting]].
 The full documentation for this SRFI can be found in the [[https://srfi.schemers.org/srfi-165/srfi-165.html][SRFI Document]].
 
 If you'd like to participate in the discussion of this SRFI, or report issues with it, please [[https://srfi.schemers.org/srfi-165/][join the SRFI-165 mailing list]] and send your message there.
 
 Thank you.
-
 
 [[mailto:srfi-editors@srfi.schemers.org][The SRFI Editors]]
